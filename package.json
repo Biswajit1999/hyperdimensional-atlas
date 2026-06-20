@@ -1,0 +1,11 @@
+{
+  "name": "hyperdimensional-atlas",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node __v.mjs",
+    "verify": "node __verify.mjs",
+    "preview": "npx http-server -p 8000 -c-1"
+  }
+}

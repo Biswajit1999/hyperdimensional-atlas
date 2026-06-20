@@ -106,7 +106,7 @@ class MiniDiagram {
   _drawSweep() {
     const period = 9; // seconds for the full cycle
     const phase = (this.t % period) / period;
-    const n = Math.min(4, Math.floor(phase * 5)); // 0..4
+    const n = Math.max(0, Math.min(4, Math.floor(phase * 5))); // 0..4
     this._drawCube(n, true);
     this._label(`${n}D — ${['point', 'segment', 'square', 'cube', 'tesseract'][n]}`);
   }

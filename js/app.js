@@ -13,7 +13,7 @@ import { rotateInPlane, rotationPresets, planeRate } from './math/rotation.js';
 import { project, hiddenDepth } from './math/projection.js';
 import { getStats, faceCount } from './math/statistics.js';
 import { ALL_DIMENSIONS, dimensionData } from './data.js';
-import { SceneManager, isWebGLAvailable } from './scene/renderer.js';
+import { SceneManager } from './scene/renderer.js';
 import { createMaterials } from './scene/materials.js';
 import { HypercubeObject } from './scene/geometry.js';
 import { depthColor } from './scene/materials.js';
@@ -35,7 +35,6 @@ if (prefersReducedMotion) state.autoRotate = false;
 const canvas = document.getElementById('scene');
 let scene, materials, hypercube;
 try {
-  if (!isWebGLAvailable()) throw new Error('WebGL context could not be created');
   scene = new SceneManager(canvas, { reducedMotion: prefersReducedMotion });
   materials = createMaterials();
   hypercube = new HypercubeObject(scene.scene, materials);
@@ -227,7 +226,7 @@ let fpsFrames = 0;
 let fpsValue = 60;
 
 function loop(now) {
-  const dt = Math.min((now - last) / 1000, 0.1);
+  const dt = Math.min(Math.max((now - last) / 1000, 0), 0.1);
   last = now;
 
   const rotating = state.autoRotate && !state.paused && state.dimension >= 2;
