@@ -1,0 +1,265 @@
+// app.js
+// Application entry point and main loop. Wires the math engine to the Three.js
+// scene and the DOM UI, owns the shared state, and recomputes geometry only when
+// it must (dimension / slice / rotation-plane changes); cosmetic changes reuse
+// the existing buffers.
+
+import * as THREE from 'three';
+import { DEFAULTS, RENDER_SCALE } from './constants.js';
+import {
+  generateVertices, generateEdges, sliceCube, vertexCount, edgeCount,
+} from './math/hypercube.js';
+import { rotateInPlane, rotationPresets, planeRate } from './math/rotation.js';
+import { project, hiddenDepth } from './math/projection.js';
+import { getStats, faceCount } from './math/statistics.js';
+import { ALL_DIMENSIONS, dimensionData } from './data.js';
+import { SceneManager, isWebGLAvailable } from './scene/renderer.js';
+import { createMaterials } from './scene/materials.js';
+import { HypercubeObject } from './scene/geometry.js';
+import { depthColor } from './scene/materials.js';
+import { Inspector } from './ui/inspector.js';
+import { Controls } from './ui/controls.js';
+import { buildNarrative } from './ui/narrative.js';
+
+const prefersReducedMotion =
+  window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---- Graceful WebGL fallback ----------------------------------------------
+if (!isWebGLAvailable()) {
+  document.getElementById('webgl-fallback').hidden = false;
+  document.getElementById('stage').classList.add('no-webgl');
+  throw new Error('WebGL unavailable — fallback shown.');
+}
+
+// ---- Shared state ----------------------------------------------------------
+const state = structuredClone(DEFAULTS);
+if (prefersReducedMotion) state.autoRotate = false;
+
+// ---- Scene -----------------------------------------------------------------
+const canvas = document.getElementById('scene');
+const scene = new SceneManager(canvas, { reducedMotion: prefersReducedMotion });
+const materials = createMaterials();
+const hypercube = new HypercubeObject(scene.scene, materials);
+
+// ---- UI --------------------------------------------------------------------
+const inspector = new Inspector(document.getElementById('inspector'));
+
+const controls = new Controls(
+  {
+    panel: document.getElementById('controls'),
+    ladder: document.getElementById('ladder'),
+    captionEl: document.getElementById('ladder-caption'),
+    perf: {
+      fps: document.getElementById('perf-fps'),
+      verts: document.getElementById('perf-verts'),
+      edges: document.getElementById('perf-edges'),
+      dim: document.getElementById('perf-dim'),
+    },
+  },
+  state,
+  {
+    onChange: handleChange,
+    onResetView: resetView,
+    onTogglePanels: togglePanels,
+  },
+);
+
+const diagrams = buildNarrative(document.getElementById('narrative'), prefersReducedMotion);
+
+// ---- Working buffers (rebuilt on topology change) --------------------------
+let base = { vertices: [], edges: [], n: -1 };
+let projectedPos = new Float32Array(3);
+let colorBuf = new Float32Array(3);
+let scratch = new Float64Array(8);
+const colorTmp = new THREE.Color();
+const out3 = [0, 0, 0];
+
+// Per-plane accumulated angles, keyed by "i,j".
+const planeAngles = new Map();
+
+function activePlanes() {
+  const presets = rotationPresets(state.dimension);
+  const preset = presets[Math.min(state.presetIndex, presets.length - 1)] || { planes: [] };
+  const planes = preset.planes;
+  if (!planes.length) return [];
+  return state.multiPlane ? planes : [planes[0]];
+}
+
+// Rebuild base vertex/edge data and reallocate GPU buffers.
+function rebuildTopology() {
+  const n = state.dimension;
+  if (state.slice.enabled && n >= 1) {
+    const axis = Math.min(state.slice.axis, Math.max(n - 1, 0));
+    const r = sliceCube(n, axis, state.slice.position);
+    base = { vertices: r.vertices, edges: r.edges, n };
+  } else {
+    base = { vertices: generateVertices(n), edges: generateEdges(n), n };
+  }
+  const V = base.vertices.length;
+  projectedPos = new Float32Array(V * 3);
+  colorBuf = new Float32Array(V * 3);
+  hypercube.setTopology(V, base.edges);
+}
+
+// Recompute projected positions + colours for the current frame.
+function computeFrame() {
+  const n = state.dimension;
+  const planes = activePlanes();
+
+  // Precompute cos/sin for each active plane at its current angle.
+  const trig = planes.map(([i, j]) => {
+    const key = `${i},${j}`;
+    const a = planeAngles.get(key) || 0;
+    return { i, j, cos: Math.cos(a), sin: Math.sin(a) };
+  });
+
+  const verts = base.vertices;
+  for (let v = 0; v < verts.length; v++) {
+    const src = verts[v];
+    for (let k = 0; k < n; k++) scratch[k] = src[k];
+
+    for (let t = 0; t < trig.length; t++) {
+      rotateInPlane(scratch, trig[t].i, trig[t].j, trig[t].cos, trig[t].sin);
+    }
+
+    const depth = hiddenDepth(scratch, n);
+    project(scratch, n, state.projection, state.focalLength, out3);
+
+    const o = v * 3;
+    projectedPos[o] = out3[0] * RENDER_SCALE;
+    projectedPos[o + 1] = out3[1] * RENDER_SCALE;
+    projectedPos[o + 2] = out3[2] * RENDER_SCALE;
+
+    depthColor(depth, state.colorEncoding, colorTmp);
+    colorBuf[o] = colorTmp.r;
+    colorBuf[o + 1] = colorTmp.g;
+    colorBuf[o + 2] = colorTmp.b;
+  }
+
+  hypercube.update(projectedPos, colorBuf, {
+    wireframe: state.wireframe,
+    vertexMarkers: state.vertexMarkers,
+    ghostTrails: state.ghostTrails,
+  });
+}
+
+// ---- Change handling -------------------------------------------------------
+function handleChange(reason) {
+  if (reason === 'dimension' || reason === 'slice') {
+    rebuildTopology();
+    inspector.update(state);
+    updateMathTable(state.dimension);
+  } else if (reason === 'rotation') {
+    // Active plane set changed; nothing to reallocate.
+  } else {
+    // 'render' / 'projection' — cosmetic, handled next frame.
+    inspector.update(state);
+  }
+}
+
+function resetView() {
+  scene.resetCamera();
+  planeAngles.clear();
+}
+
+function togglePanels() {
+  state.showPanels = !state.showPanels;
+  document.body.classList.toggle('panels-hidden', !state.showPanels);
+}
+
+// ---- Mathematics section tables -------------------------------------------
+function updateMathTable(n) {
+  const tbody = document.getElementById('combinatorics-body');
+  if (!tbody) return;
+  const stats = getStats(n);
+  const d = dimensionData(n);
+  document.getElementById('combinatorics-title').textContent =
+    `${n}D — ${d.name} (${d.ncube})`;
+  let rows = '';
+  for (let k = 0; k <= n; k++) {
+    const label = ['vertices', 'edges', 'squares', 'cubic cells'][k] || `${k}-faces`;
+    rows += `<tr><td class="mono">${k}</td><td>${label}</td><td class="mono">${faceCount(n, k).toLocaleString()}</td></tr>`;
+  }
+  tbody.innerHTML = rows;
+  document.getElementById('formula-vertices').textContent = stats.vertices.toLocaleString();
+  document.getElementById('formula-edges').textContent = stats.edges.toLocaleString();
+}
+
+function buildGrowthTable() {
+  const tbody = document.getElementById('growth-body');
+  if (!tbody) return;
+  tbody.innerHTML = ALL_DIMENSIONS.map((d) => {
+    const s = d.stats;
+    return `<tr>
+      <td class="mono">${d.n}D</td>
+      <td>${d.name}</td>
+      <td class="mono">${s.vertices.toLocaleString()}</td>
+      <td class="mono">${s.edges.toLocaleString()}</td>
+      <td class="mono">${s.squares.toLocaleString()}</td>
+      <td class="mono">${s.cubes.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ---- Navigation ------------------------------------------------------------
+function setupNav() {
+  document.querySelectorAll('[data-scroll]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.scroll);
+      if (target) target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+    });
+  });
+  const tl = document.getElementById('toggle-left');
+  const tr = document.getElementById('toggle-right');
+  if (tl) tl.addEventListener('click', () => document.body.classList.toggle('show-left'));
+  if (tr) tr.addEventListener('click', () => document.body.classList.toggle('show-right'));
+}
+
+// ---- Main loop -------------------------------------------------------------
+let last = performance.now();
+let fpsAccum = 0;
+let fpsFrames = 0;
+let fpsValue = 60;
+
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.1);
+  last = now;
+
+  const rotating = state.autoRotate && !state.paused && state.dimension >= 2;
+  if (rotating) {
+    const planes = activePlanes();
+    planes.forEach(([i, j], idx) => {
+      const key = `${i},${j}`;
+      const a = (planeAngles.get(key) || 0) + dt * state.rotationSpeed * planeRate(idx);
+      planeAngles.set(key, a);
+    });
+  }
+
+  computeFrame();
+  scene.render(dt);
+  diagrams.forEach((d) => d.step(dt));
+
+  // FPS sampling.
+  fpsAccum += dt;
+  fpsFrames++;
+  if (fpsAccum >= 0.5) {
+    fpsValue = fpsFrames / fpsAccum;
+    fpsAccum = 0;
+    fpsFrames = 0;
+    controls.setPerf(fpsValue, vertexCount(state.dimension), edgeCount(state.dimension));
+  }
+
+  requestAnimationFrame(loop);
+}
+
+// ---- Boot ------------------------------------------------------------------
+rebuildTopology();
+inspector.update(state);
+updateMathTable(state.dimension);
+buildGrowthTable();
+setupNav();
+controls.setPerf(60, vertexCount(state.dimension), edgeCount(state.dimension));
+requestAnimationFrame(loop);
+
+// Expose a tiny handle for debugging in the console (no analytics, no network).
+window.__atlas = { state, scene };

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0" />
+  <meta name="description" content="Hyperdimensional Atlas — an interactive visual laboratory for the geometry of hypercubes from 0D to 8D. Explore projections, rotations, and cross-sections of n-dimensional cubes." />
+  <meta name="color-scheme" content="dark" />
+  <title>Hyperdimensional Atlas — geometry beyond perception</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Pinned Three.js via import map. Single consistent version, no bundler. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- Top navigation -->
+  <header class="topnav">
+    <div class="brand">
+      <span class="brand-title">HYPERDIMENSIONAL ATLAS</span>
+      <span class="brand-sub">A visual laboratory for geometry beyond perception</span>
+    </div>
+    <nav class="nav-links">
+      <button class="nav-btn" data-scroll="stage">Explore</button>
+      <button class="nav-btn" data-scroll="mathematics">Mathematics</button>
+      <button class="nav-btn" data-scroll="physics">Physics</button>
+      <button class="nav-btn" data-scroll="about">About</button>
+      <a class="nav-icon" href="#" aria-label="Source repository (placeholder)" title="Repository link placeholder" onclick="return false;">
+        <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      </a>
+    </nav>
+  </header>
+
+  <!-- Interactive stage -->
+  <main id="stage" class="stage">
+    <canvas id="scene" aria-label="Interactive hypercube projection"></canvas>
+
+    <!-- WebGL fallback -->
+    <div id="webgl-fallback" class="fallback" hidden>
+      <div class="fallback-card">
+        <h2>WebGL is unavailable</h2>
+        <p>This visualisation needs WebGL, which your browser or device does not currently
+        support. The mathematics, formulas, and written sections below remain fully readable.</p>
+        <button class="btn" data-scroll="mathematics">Read the mathematics</button>
+      </div>
+    </div>
+
+    <!-- Mobile panel toggles -->
+    <button id="toggle-left" class="fab fab-left" aria-label="Toggle controls">Controls</button>
+    <button id="toggle-right" class="fab fab-right" aria-label="Toggle inspector">Info</button>
+
+    <!-- Left control panel -->
+    <aside id="controls" class="panel panel-left" aria-label="Instrument controls"></aside>
+
+    <!-- Right scientific inspector -->
+    <aside id="inspector" class="panel panel-right" aria-label="Scientific inspector"></aside>
+
+    <!-- Performance indicator -->
+    <div class="perf mono" aria-label="Performance indicator">
+      <span><i>FPS</i> <b id="perf-fps">60</b></span>
+      <span><i>VERTS</i> <b id="perf-verts">16</b></span>
+      <span><i>EDGES</i> <b id="perf-edges">32</b></span>
+      <span><i>DIM</i> <b id="perf-dim">4D</b></span>
+    </div>
+
+    <!-- Bottom dimensional ladder -->
+    <div class="ladder-wrap">
+      <p id="ladder-caption" class="ladder-caption"></p>
+      <div id="ladder" class="ladder" role="tablist" aria-label="Dimensional ladder"></div>
+    </div>
+  </main>
+
+  <!-- Narrative sections (built by narrative.js) -->
+  <div id="narrative" class="narrative"></div>
+
+  <!-- Mathematics -->
+  <section id="mathematics" class="doc-section">
+    <div class="doc-inner">
+      <span class="kicker mono">Mathematics</span>
+      <h2>The exact structure of an n-cube</h2>
+      <p>Every figure in this atlas is generated from first principles, not drawn by hand.
+      A centred <em>n</em>-cube is the set of points whose coordinates are each ±1, so it has
+      <strong id="formula-vertices">16</strong> vertices in the current dimension. Two vertices
+      are joined by an edge exactly when their coordinate vectors differ in a single coordinate
+      (Hamming distance one), giving <strong id="formula-edges">32</strong> edges.</p>
+
+      <div class="formula-grid">
+        <div class="formula-card">
+          <span class="formula-name">Vertices</span>
+          <span class="formula-eq">V = 2<sup>n</sup></span>
+        </div>
+        <div class="formula-card">
+          <span class="formula-name">Edges</span>
+          <span class="formula-eq">E = n · 2<sup>n−1</sup></span>
+        </div>
+        <div class="formula-card">
+          <span class="formula-name">k-faces</span>
+          <span class="formula-eq">f<sub>k</sub>(n) = C(n, k) · 2<sup>n−k</sup></span>
+        </div>
+        <div class="formula-card">
+          <span class="formula-name">Hypervolume</span>
+          <span class="formula-eq">V<sub>n</sub> = s<sup>n</sup></span>
+        </div>
+        <div class="formula-card">
+          <span class="formula-name">Boundary measure</span>
+          <span class="formula-eq">B<sub>n−1</sub> = 2n · s<sup>n−1</sup></span>
+        </div>
+        <div class="formula-card">
+          <span class="formula-name">Plane rotation</span>
+          <span class="formula-eq">x<sub>i</sub>′ = x<sub>i</sub>cosθ − x<sub>j</sub>sinθ</span>
+        </div>
+      </div>
+
+      <div class="table-pair">
+        <div class="table-block">
+          <h3 id="combinatorics-title">Combinatorics</h3>
+          <p class="table-note">Face vector for the dimension selected above — updates live.</p>
+          <table class="data-table">
+            <thead><tr><th>k</th><th>face type</th><th>count</th></tr></thead>
+            <tbody id="combinatorics-body"></tbody>
+          </table>
+        </div>
+        <div class="table-block">
+          <h3>Dimensional growth, 0D → 8D</h3>
+          <p class="table-note">Vertices double each step; higher faces follow the binomial rule.</p>
+          <table class="data-table">
+            <thead><tr><th>dim</th><th>name</th><th>V</th><th>E</th><th>squares</th><th>cells</th></tr></thead>
+            <tbody id="growth-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="doc-more">Full derivations are in
+        <a href="docs/mathematics.md">docs/mathematics.md</a>.</p>
+    </div>
+  </section>
+
+  <!-- Physics & Astronomy -->
+  <section id="physics" class="doc-section alt">
+    <div class="doc-inner">
+      <span class="kicker mono">Physics &amp; Astronomy</span>
+      <h2>Mathematical dimensions versus physical dimensions</h2>
+      <p class="lede">A tesseract is a four-dimensional Euclidean spatial object. It is not the
+      same thing as spacetime. The distinction matters, and this atlas keeps it explicit.</p>
+
+      <div class="phys-grid">
+        <article class="phys-card">
+          <h3>Spacetime and relativity</h3>
+          <p>Special relativity treats spacetime as three spatial dimensions plus one time
+          dimension (3+1). But time is not interchangeable with a spatial axis: in the interval
+          it enters with the opposite sign, so a 4-cube of space is genuinely different from
+          4D spacetime. General relativity then describes spacetime as a <em>curved</em>
+          four-dimensional manifold.</p>
+        </article>
+        <article class="phys-card">
+          <h3>Kaluza–Klein &amp; compactification</h3>
+          <p>One historical idea adds a fifth spatial dimension curled into a tiny compact
+          circle, unifying electromagnetism with gravity in a single geometric picture. It is
+          mathematically elegant — but no experiment has established such a dimension exists.</p>
+        </article>
+        <article class="phys-card">
+          <h3>String theory &amp; M-theory</h3>
+          <p>Some frameworks require ten or eleven total dimensions for internal mathematical
+          consistency, with the extra ones compactified at minute scales. These are theoretical
+          frameworks, not confirmed observations.</p>
+        </article>
+        <article class="phys-card">
+          <h3>Astronomical data spaces</h3>
+          <p>Astronomy already lives in high-dimensional spaces: stellar spectra, exoplanet
+          population parameters, Gaia astrometric measurements, cosmological likelihood
+          surfaces, and machine-learning feature spaces. We never see them directly — we reason
+          through projections, slices, correlations, and reduced representations. That is the
+          same instinct this atlas trains.</p>
+        </article>
+      </div>
+
+      <div class="humility">
+        <h3>Scientific humility</h3>
+        <p>The visualiser shows mathematical projections, not photographs or direct views of
+        extra dimensions. Visual beauty is not evidence. A simulation can build intuition; it
+        cannot replace experimental validation. More detail is in
+        <a href="docs/physics-and-astronomy.md">docs/physics-and-astronomy.md</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="doc-section">
+    <div class="doc-inner narrow">
+      <span class="kicker mono">About</span>
+      <h2>Why this exists</h2>
+      <p>Higher-dimensional geometry is usually introduced either as a wall of equations or as
+      a piece of science fiction. Hyperdimensional Atlas is an attempt at a more honest middle
+      path: a visual instrument for exploring projections, rotations, slices, and the exact
+      combinatorial structure of hypercubes, while staying clear about what a visualisation can
+      and cannot claim.</p>
+      <p>Everything renders in your browser from plain HTML, CSS, and vanilla JavaScript modules,
+      with Three.js for the WebGL scene. There is no tracking and no server. Read more in the
+      <a href="README.md">README</a> and the <a href="docs/references.md">references</a>.</p>
+      <p class="footer-note mono">Built as a static site · projections, not photographs · no analytics</p>
+    </div>
+  </section>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

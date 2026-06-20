@@ -1,0 +1,109 @@
+// inspector.js
+// The right-hand scientific inspector. Reflects the current dimension's exact
+// combinatorics, measures, and a plain-language description. Pure DOM updates.
+
+import { dimensionData } from '../data.js';
+import { DIMENSION_BLURB, PROJECTION_EXPLAIN } from '../content.js';
+import { perspectiveWarning } from '../math/projection.js';
+
+export class Inspector {
+  constructor(root) {
+    this.root = root;
+    this.root.innerHTML = `
+      <header class="panel-head">
+        <span class="panel-eyebrow">Scientific inspector</span>
+        <h2 id="insp-name" class="insp-name">Tesseract</h2>
+        <div class="insp-sub">
+          <span id="insp-ncube" class="mono">4-cube</span>
+          <span class="dot">·</span>
+          <span class="mono">Schläfli <span id="insp-schlafli">{4, 3, 3}</span></span>
+        </div>
+      </header>
+
+      <dl class="insp-grid" id="insp-grid">
+        <div><dt>Vertices</dt><dd id="insp-v" class="mono">16</dd></div>
+        <div><dt>Edges</dt><dd id="insp-e" class="mono">32</dd></div>
+        <div><dt>Square faces</dt><dd id="insp-sq" class="mono">24</dd></div>
+        <div><dt>Cubic cells</dt><dd id="insp-cu" class="mono">8</dd></div>
+        <div><dt>Hypervolume</dt><dd id="insp-hv" class="mono">s⁴</dd></div>
+        <div><dt>Boundary</dt><dd id="insp-bd" class="mono">8·s³</dd></div>
+      </dl>
+
+      <section class="insp-block">
+        <h3>Projection</h3>
+        <p id="insp-proj" class="insp-text"></p>
+        <p id="insp-warn" class="insp-warn" hidden>⚠ High perspective exaggeration — near cells are strongly magnified.</p>
+      </section>
+
+      <section class="insp-block">
+        <h3>What you are seeing</h3>
+        <p id="insp-blurb" class="insp-text"></p>
+      </section>
+
+      <section class="insp-block" id="insp-slice-block" hidden>
+        <h3>Cross-section</h3>
+        <p id="insp-slice" class="insp-text"></p>
+      </section>
+    `;
+
+    this.el = {
+      name: this.root.querySelector('#insp-name'),
+      ncube: this.root.querySelector('#insp-ncube'),
+      schlafli: this.root.querySelector('#insp-schlafli'),
+      v: this.root.querySelector('#insp-v'),
+      e: this.root.querySelector('#insp-e'),
+      sq: this.root.querySelector('#insp-sq'),
+      cu: this.root.querySelector('#insp-cu'),
+      hv: this.root.querySelector('#insp-hv'),
+      bd: this.root.querySelector('#insp-bd'),
+      proj: this.root.querySelector('#insp-proj'),
+      warn: this.root.querySelector('#insp-warn'),
+      blurb: this.root.querySelector('#insp-blurb'),
+      sliceBlock: this.root.querySelector('#insp-slice-block'),
+      slice: this.root.querySelector('#insp-slice'),
+    };
+  }
+
+  /**
+   * @param {object} state full app state
+   */
+  update(state) {
+    const n = state.dimension;
+    const d = dimensionData(n);
+    const s = d.stats;
+
+    this.el.name.textContent = d.name;
+    this.el.ncube.textContent = d.ncube;
+    this.el.schlafli.textContent = d.schlafli;
+    this.el.v.textContent = s.vertices.toLocaleString();
+    this.el.e.textContent = s.edges.toLocaleString();
+    this.el.sq.textContent = s.squares.toLocaleString();
+    this.el.cu.textContent = s.cubes.toLocaleString();
+    this.el.hv.textContent = s.hypervolume;
+    this.el.bd.textContent = s.boundary;
+
+    this.el.proj.textContent = PROJECTION_EXPLAIN[state.projection];
+    this.el.blurb.textContent = DIMENSION_BLURB[n];
+
+    const warn = perspectiveWarning(n, state.focalLength) && state.projection !== 'orthographic';
+    this.el.warn.hidden = !warn;
+
+    // Cross-section readout.
+    if (state.slice.enabled && n >= 1) {
+      const axisName = n > state.slice.axis ? coordName(state.slice.axis) : coordName(0);
+      const sub = Math.max(n - 1, 0);
+      const subName = dimensionData(sub).name.toLowerCase();
+      this.el.sliceBlock.hidden = false;
+      this.el.slice.textContent =
+        `Fixing ${axisName} = ${state.slice.position.toFixed(2)} intersects the ` +
+        `${d.name.toLowerCase()} in a ${sub}-cube — a ${subName}. ` +
+        `Sweep the slider to move the cut through the figure.`;
+    } else {
+      this.el.sliceBlock.hidden = true;
+    }
+  }
+}
+
+function coordName(i) {
+  return i < 3 ? ['x', 'y', 'z'][i] : `q${i + 1}`;
+}
