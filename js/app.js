@@ -13,7 +13,7 @@ import { rotateInPlane, rotationPresets, planeRate } from './math/rotation.js';
 import { project, hiddenDepth } from './math/projection.js';
 import { getStats, faceCount } from './math/statistics.js';
 import { ALL_DIMENSIONS, dimensionData } from './data.js';
-import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260620b';
+import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260620c';
 import { createMaterials } from './scene/materials.js';
 import { HypercubeObject } from './scene/geometry.js';
 import { depthColor } from './scene/materials.js';
@@ -234,12 +234,24 @@ function showWebGLFallback(err) {
 
   const diagnostic = document.getElementById('webgl-diagnostic');
   if (diagnostic) {
-    const lines = [
+    diagnostic.textContent = [
       `Renderer error: ${err?.message || 'unknown failure'}`,
-      ...webGLDiagnostics(),
-      'Fix: enable browser hardware acceleration / WebGL, then reload.',
-    ];
-    diagnostic.textContent = lines.join('\n');
+      'Collecting WebGL details...',
+    ].join('\n');
+    try {
+      const lines = [
+        `Renderer error: ${err?.message || 'unknown failure'}`,
+        ...webGLDiagnostics(),
+        'Fix: enable browser hardware acceleration / WebGL, then reload.',
+      ];
+      diagnostic.textContent = lines.join('\n');
+    } catch (diagnosticErr) {
+      diagnostic.textContent = [
+        `Renderer error: ${err?.message || 'unknown failure'}`,
+        `Diagnostic probe failed: ${diagnosticErr?.message || 'unknown failure'}`,
+        'Fix: enable browser hardware acceleration / WebGL, then reload.',
+      ].join('\n');
+    }
   }
 
   startFallbackPreview();
@@ -312,7 +324,7 @@ function startFallbackPreview() {
     if (!prefersReducedMotion) requestAnimationFrame(draw);
   }
 
-  requestAnimationFrame(draw);
+  draw(performance.now());
 }
 
 // ---- Main loop -------------------------------------------------------------

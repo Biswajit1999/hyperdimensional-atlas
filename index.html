@@ -7,7 +7,7 @@
   <meta name="color-scheme" content="dark" />
   <title>Hyperdimensional Atlas — geometry beyond perception</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="styles.css?v=20260620b" />
+  <link rel="stylesheet" href="styles.css?v=20260620c" />
 
   <!-- Pinned Three.js via import map. Single consistent version, no bundler. -->
   <script type="importmap">
@@ -48,8 +48,28 @@
         <p>Your browser blocked the GPU-powered WebGL view, so this page is showing a
         Canvas 2D projection fallback. The full atlas works after WebGL or hardware
         acceleration is enabled.</p>
-        <canvas id="fallback-canvas" class="fallback-canvas" aria-label="2D tesseract fallback preview"></canvas>
-        <pre id="webgl-diagnostic" class="fallback-diagnostic mono" aria-live="polite"></pre>
+        <div class="fallback-visual" aria-label="2D tesseract fallback preview">
+          <svg class="fallback-svg" viewBox="0 0 360 190" aria-hidden="true">
+            <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="62" y="36" width="132" height="132" stroke="rgba(70,224,240,0.90)" stroke-width="2" />
+              <rect x="166" y="22" width="132" height="132" stroke="rgba(169,139,255,0.88)" stroke-width="2" />
+              <rect x="106" y="76" width="82" height="82" stroke="rgba(255,180,84,0.82)" stroke-width="1.7" />
+              <rect x="194" y="58" width="82" height="82" stroke="rgba(70,224,240,0.62)" stroke-width="1.7" />
+              <path d="M62 36 L166 22 M194 36 L298 22 M62 168 L166 154 M194 168 L298 154" stroke="rgba(91,140,255,0.76)" stroke-width="1.6" />
+              <path d="M106 76 L194 58 M188 76 L276 58 M106 158 L194 140 M188 158 L276 140" stroke="rgba(169,139,255,0.62)" stroke-width="1.4" />
+              <path d="M62 36 L106 76 M194 36 L188 76 M166 22 L194 58 M298 22 L276 58" stroke="rgba(70,224,240,0.52)" stroke-width="1.2" />
+              <path d="M62 168 L106 158 M194 168 L188 158 M166 154 L194 140 M298 154 L276 140" stroke="rgba(255,180,84,0.50)" stroke-width="1.2" />
+            </g>
+            <g fill="rgba(234,242,255,0.96)">
+              <circle cx="62" cy="36" r="3" /><circle cx="194" cy="36" r="3" /><circle cx="62" cy="168" r="3" /><circle cx="194" cy="168" r="3" />
+              <circle cx="166" cy="22" r="3" /><circle cx="298" cy="22" r="3" /><circle cx="166" cy="154" r="3" /><circle cx="298" cy="154" r="3" />
+              <circle cx="106" cy="76" r="2.4" /><circle cx="188" cy="76" r="2.4" /><circle cx="106" cy="158" r="2.4" /><circle cx="188" cy="158" r="2.4" />
+              <circle cx="194" cy="58" r="2.4" /><circle cx="276" cy="58" r="2.4" /><circle cx="194" cy="140" r="2.4" /><circle cx="276" cy="140" r="2.4" />
+            </g>
+          </svg>
+          <canvas id="fallback-canvas" class="fallback-canvas" aria-hidden="true"></canvas>
+        </div>
+        <pre id="webgl-diagnostic" class="fallback-diagnostic mono" aria-live="polite">Diagnostics loading. If this text stays unchanged, the browser blocked the fallback script before WebGL details could be collected.</pre>
         <button class="btn" data-scroll="mathematics">Read the mathematics</button>
       </div>
     </div>
@@ -243,6 +263,6 @@
     <p class="footer-base mono">© 2026 Biswajit Jana · MIT-licensed source · projections, not photographs · no analytics</p>
   </footer>
 
-  <script type="module" src="js/app.js?v=20260620b"></script>
+  <script type="module" src="js/app.js?v=20260620c"></script>
 </body>
 </html>
