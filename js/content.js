@@ -128,7 +128,7 @@ export const NARRATIVE_SECTIONS = [
   },
   {
     id: 'meaning',
-    kicker: '05 — Honesty',
+    kicker: '05 — Interpretation',
     title: 'What Higher Dimensions Do — and Do Not — Mean',
     html: `
       <p>This is a visual instrument for mathematics. Everything you rotate and slice here

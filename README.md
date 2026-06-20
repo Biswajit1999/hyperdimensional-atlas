@@ -6,9 +6,9 @@
 
 ## Why I built this
 
-Higher-dimensional geometry tends to arrive in one of two unsatisfying forms: a page of equations with nothing to look at, or a piece of science fiction with nothing behind it. I wanted something in between — an honest instrument. The goal of Hyperdimensional Atlas is to let people turn, slice, and inspect the exact structure of an n-cube while staying clear-eyed about what a picture of it can actually claim.
+I work on astronomical instrumentation, where high-dimensional spaces are part of the daily routine — spectra, parameter grids, likelihood surfaces — and where we never see those spaces directly but reason about them through projections, slices, and reduced representations. Hyperdimensional Atlas applies that habit to a clean test case: the n-cube. It lets you turn, slice, and inspect the exact structure of a hypercube while keeping clear about what a picture of it can actually claim.
 
-A point made early and kept throughout: what you see here are **projections**, not direct views. A four-dimensional cube cannot be drawn in three-dimensional space any more than a cube can be drawn on a flat page without distortion. The "cube within a cube" is a shadow, faithful to the geometry but not a photograph of a fourth dimension. I am interested in using visualisation to make abstract mathematics approachable without overselling speculative physics, so the interface keeps mathematics, established physics, and speculation in separate boxes.
+What you see here are **projections**, not direct views. A four-dimensional cube cannot be drawn in three-dimensional space any more than a cube can be drawn on a flat page without distortion. The "cube within a cube" is a shadow — faithful to the geometry, but not a photograph of a fourth dimension. The interface keeps mathematics, established physics, and speculation in separate boxes so the tool stays useful for building intuition without overstating speculative physics.
 
 ## Features
 
@@ -109,6 +109,34 @@ Then open `http://localhost:8000/`.
 ## References
 
 A short, non-fabricated reading list is in [`docs/references.md`](docs/references.md). It points to standard texts (Coxeter's *Regular Polytopes*, Banchoff's work on higher-dimensional geometry, Abbott's *Flatland* as historical fiction) and the Three.js documentation, without invented page numbers or DOIs.
+
+## Author
+
+Built and maintained by **Biswajit Jana** — research in exoplanet instrumentation and extreme-precision radial velocity.
+
+- GitHub: https://github.com/Biswajit1999/hyperdimensional-atlas
+- Email: biswajitj998@gmail.com
+
+## Citation
+
+If you use or reference this work, please cite it as:
+
+> Jana, B. (2026). *Hyperdimensional Atlas: an interactive visual laboratory for the geometry of hypercubes (0D–8D)* [Web application]. https://biswajit1999.github.io/hyperdimensional-atlas/
+
+```bibtex
+@misc{jana2026hyperatlas,
+  author = {Jana, Biswajit},
+  title  = {Hyperdimensional Atlas: an interactive visual laboratory
+            for the geometry of hypercubes (0D--8D)},
+  year   = {2026},
+  note   = {Web application},
+  url    = {https://biswajit1999.github.io/hyperdimensional-atlas/}
+}
+```
+
+## License
+
+Released under the MIT License. See [`LICENSE`](LICENSE).
 
 ---
 

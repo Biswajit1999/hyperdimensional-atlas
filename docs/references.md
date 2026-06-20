@@ -31,7 +31,7 @@ exact details.
 - **Three.js documentation** — the official documentation for the WebGL library used to
   render the scene (`https://threejs.org/docs/`).
 
-## A note on honesty
+## A note on sourcing
 
 This list deliberately avoids fabricated specifics. If you need an exact citation for
 a claim, go to the primary source and record the edition, chapter, and page yourself.

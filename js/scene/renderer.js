@@ -10,15 +10,24 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { createStarfield } from './effects.js';
 import { PALETTE } from '../constants.js';
 
-/** Detect WebGL availability for graceful degradation. */
+/**
+ * Detect WebGL availability for graceful degradation. Tries webgl2, webgl, and
+ * the legacy experimental-webgl context names, since different browsers expose
+ * different ones. Each attempt uses a fresh canvas so a failed first attempt
+ * cannot poison the next.
+ */
 export function isWebGLAvailable() {
-  try {
-    const canvas = document.createElement('canvas');
-    return !!(window.WebGLRenderingContext &&
-      (canvas.getContext('webgl2') || canvas.getContext('webgl')));
-  } catch (e) {
-    return false;
+  const names = ['webgl2', 'webgl', 'experimental-webgl'];
+  for (const name of names) {
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext(name, { failIfMajorPerformanceCaveat: false });
+      if (ctx) return true;
+    } catch (e) {
+      // try the next context name
+    }
   }
+  return false;
 }
 
 export class SceneManager {

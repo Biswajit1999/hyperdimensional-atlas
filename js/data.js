@@ -25,7 +25,7 @@ export const DIMENSION_NCUBE = [
 ];
 
 // Schläfli symbols for the regular measure polytopes. The n-cube is {4, 3^(n-2)}.
-// Lower dimensions have degenerate/short symbols, given honestly below.
+// Lower dimensions have degenerate/short symbols, given explicitly below.
 export const SCHLAFLI = [
   '—',            // 0  point (no symbol)
   '{ }',          // 1  segment

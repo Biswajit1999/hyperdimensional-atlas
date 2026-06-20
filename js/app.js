@@ -24,22 +24,27 @@ import { buildNarrative } from './ui/narrative.js';
 const prefersReducedMotion =
   window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// ---- Graceful WebGL fallback ----------------------------------------------
-if (!isWebGLAvailable()) {
-  document.getElementById('webgl-fallback').hidden = false;
-  document.getElementById('stage').classList.add('no-webgl');
-  throw new Error('WebGL unavailable — fallback shown.');
-}
-
 // ---- Shared state ----------------------------------------------------------
 const state = structuredClone(DEFAULTS);
 if (prefersReducedMotion) state.autoRotate = false;
 
-// ---- Scene -----------------------------------------------------------------
+// ---- Scene (with graceful WebGL fallback) ---------------------------------
+// The authoritative test for WebGL is whether the renderer actually
+// constructs; a feature-detect alone gives false negatives on some browsers.
+// So we attempt the real scene and only fall back if it genuinely throws.
 const canvas = document.getElementById('scene');
-const scene = new SceneManager(canvas, { reducedMotion: prefersReducedMotion });
-const materials = createMaterials();
-const hypercube = new HypercubeObject(scene.scene, materials);
+let scene, materials, hypercube;
+try {
+  if (!isWebGLAvailable()) throw new Error('WebGL context could not be created');
+  scene = new SceneManager(canvas, { reducedMotion: prefersReducedMotion });
+  materials = createMaterials();
+  hypercube = new HypercubeObject(scene.scene, materials);
+} catch (err) {
+  console.warn('Hyperdimensional Atlas — WebGL scene unavailable:', err);
+  document.getElementById('webgl-fallback').hidden = false;
+  document.getElementById('stage').classList.add('no-webgl');
+  throw err; // stop here; the written sections below remain readable
+}
 
 // ---- UI --------------------------------------------------------------------
 const inspector = new Inspector(document.getElementById('inspector'));

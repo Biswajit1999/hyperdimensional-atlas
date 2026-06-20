@@ -31,7 +31,7 @@
       <button class="nav-btn" data-scroll="mathematics">Mathematics</button>
       <button class="nav-btn" data-scroll="physics">Physics</button>
       <button class="nav-btn" data-scroll="about">About</button>
-      <a class="nav-icon" href="#" aria-label="Source repository (placeholder)" title="Repository link placeholder" onclick="return false;">
+      <a class="nav-icon" href="https://github.com/Biswajit1999/hyperdimensional-atlas" target="_blank" rel="noopener" aria-label="Source repository on GitHub" title="View source on GitHub">
         <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
       </a>
     </nav>
@@ -194,18 +194,51 @@
   <section id="about" class="doc-section">
     <div class="doc-inner narrow">
       <span class="kicker mono">About</span>
-      <h2>Why this exists</h2>
-      <p>Higher-dimensional geometry is usually introduced either as a wall of equations or as
-      a piece of science fiction. Hyperdimensional Atlas is an attempt at a more honest middle
-      path: a visual instrument for exploring projections, rotations, slices, and the exact
-      combinatorial structure of hypercubes, while staying clear about what a visualisation can
-      and cannot claim.</p>
-      <p>Everything renders in your browser from plain HTML, CSS, and vanilla JavaScript modules,
-      with Three.js for the WebGL scene. There is no tracking and no server. Read more in the
-      <a href="README.md">README</a> and the <a href="docs/references.md">references</a>.</p>
-      <p class="footer-note mono">Built as a static site · projections, not photographs · no analytics</p>
+      <h2>Why I built this</h2>
+      <p>I work on astronomical instrumentation, where high-dimensional spaces are routine —
+      spectra, parameter grids, likelihood surfaces — yet we only ever inspect them through
+      projections, slices, and reduced representations. I built Hyperdimensional Atlas to apply
+      that same habit to a clean test case: the n-cube. Every figure here is generated directly
+      from the polytope's definition, so what you rotate and slice is the exact object, shown as
+      a projection rather than a direct view.</p>
+      <p>The interface keeps three things deliberately separate: the mathematics, which is exact;
+      established physics, which is narrow; and speculation, which is labelled as such. Everything
+      runs in your browser from plain HTML, CSS, and JavaScript modules with Three.js — no server,
+      no tracking. More detail is in the <a href="README.md">README</a> and the
+      <a href="docs/references.md">references</a>.</p>
     </div>
   </section>
+
+  <!-- Footer: authorship & citation -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-author">
+        <span class="footer-eyebrow mono">Author</span>
+        <p class="footer-name">Biswajit Jana</p>
+        <p class="footer-role">Research in exoplanet instrumentation and extreme-precision radial velocity</p>
+        <p class="footer-links mono">
+          <a href="https://github.com/Biswajit1999/hyperdimensional-atlas" target="_blank" rel="noopener">GitHub</a>
+          <span class="sep">·</span>
+          <a href="mailto:biswajitj998@gmail.com">biswajitj998@gmail.com</a>
+        </p>
+      </div>
+      <div class="footer-cite">
+        <span class="footer-eyebrow mono">How to cite</span>
+        <p class="cite-text">Jana, B. (2026). <em>Hyperdimensional Atlas: an interactive visual
+        laboratory for the geometry of hypercubes (0D–8D)</em> [Web application].
+        https://biswajit1999.github.io/hyperdimensional-atlas/</p>
+        <pre class="cite-bibtex mono">@misc{jana2026hyperatlas,
+  author = {Jana, Biswajit},
+  title  = {Hyperdimensional Atlas: an interactive visual laboratory
+            for the geometry of hypercubes (0D--8D)},
+  year   = {2026},
+  note   = {Web application},
+  url    = {https://biswajit1999.github.io/hyperdimensional-atlas/}
+}</pre>
+      </div>
+    </div>
+    <p class="footer-base mono">© 2026 Biswajit Jana · MIT-licensed source · projections, not photographs · no analytics</p>
+  </footer>
 
   <script type="module" src="js/app.js"></script>
 </body>
