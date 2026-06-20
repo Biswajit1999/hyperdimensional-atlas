@@ -13,7 +13,7 @@ import { rotateInPlane, rotationPresets, planeRate } from './math/rotation.js';
 import { project, hiddenDepth } from './math/projection.js';
 import { getStats, faceCount } from './math/statistics.js';
 import { ALL_DIMENSIONS, dimensionData } from './data.js';
-import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260620c';
+import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260620d';
 import { createMaterials } from './scene/materials.js';
 import { HypercubeObject } from './scene/geometry.js';
 import { depthColor } from './scene/materials.js';
@@ -290,15 +290,17 @@ function startFallbackPreview() {
     });
 
     ctx.clearRect(0, 0, width, height);
-    const grd = ctx.createRadialGradient(width / 2, height / 2, 10, width / 2, height / 2, Math.max(width, height) / 2);
+    const grd = ctx.createRadialGradient(width * 0.62, height * 0.46, 20, width * 0.62, height * 0.46, Math.max(width, height) * 0.58);
     grd.addColorStop(0, 'rgba(70,224,240,0.16)');
-    grd.addColorStop(1, 'rgba(5,6,10,0.02)');
+    grd.addColorStop(0.42, 'rgba(91,140,255,0.07)');
+    grd.addColorStop(1, 'rgba(5,6,10,0)');
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, width, height);
 
-    const scale = Math.min(width, height) * 0.24;
-    const cx = width / 2;
-    const cy = height / 2;
+    const compact = width < 760;
+    const scale = Math.min(width, height) * (compact ? 0.30 : 0.22);
+    const cx = compact ? width / 2 : width * 0.62;
+    const cy = compact ? height * 0.42 : height * 0.48;
     const toScreen = (p) => [cx + p[0] * scale, cy - p[1] * scale];
 
     ctx.lineWidth = 1.1;

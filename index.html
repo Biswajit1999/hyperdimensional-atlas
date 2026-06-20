@@ -7,7 +7,7 @@
   <meta name="color-scheme" content="dark" />
   <title>Hyperdimensional Atlas — geometry beyond perception</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="styles.css?v=20260620c" />
+  <link rel="stylesheet" href="styles.css?v=20260620d" />
 
   <!-- Pinned Three.js via import map. Single consistent version, no bundler. -->
   <script type="importmap">
@@ -41,36 +41,51 @@
   <main id="stage" class="stage">
     <canvas id="scene" aria-label="Interactive hypercube projection"></canvas>
 
-    <!-- WebGL fallback -->
+    <!-- Lightweight renderer used when WebGL is unavailable. -->
     <div id="webgl-fallback" class="fallback" hidden>
-      <div class="fallback-card">
-        <h2>2D fallback mode</h2>
-        <p>Your browser blocked the GPU-powered WebGL view, so this page is showing a
-        Canvas 2D projection fallback. The full atlas works after WebGL or hardware
-        acceleration is enabled.</p>
-        <div class="fallback-visual" aria-label="2D tesseract fallback preview">
-          <svg class="fallback-svg" viewBox="0 0 360 190" aria-hidden="true">
-            <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="62" y="36" width="132" height="132" stroke="rgba(70,224,240,0.90)" stroke-width="2" />
-              <rect x="166" y="22" width="132" height="132" stroke="rgba(169,139,255,0.88)" stroke-width="2" />
-              <rect x="106" y="76" width="82" height="82" stroke="rgba(255,180,84,0.82)" stroke-width="1.7" />
-              <rect x="194" y="58" width="82" height="82" stroke="rgba(70,224,240,0.62)" stroke-width="1.7" />
-              <path d="M62 36 L166 22 M194 36 L298 22 M62 168 L166 154 M194 168 L298 154" stroke="rgba(91,140,255,0.76)" stroke-width="1.6" />
-              <path d="M106 76 L194 58 M188 76 L276 58 M106 158 L194 140 M188 158 L276 140" stroke="rgba(169,139,255,0.62)" stroke-width="1.4" />
-              <path d="M62 36 L106 76 M194 36 L188 76 M166 22 L194 58 M298 22 L276 58" stroke="rgba(70,224,240,0.52)" stroke-width="1.2" />
-              <path d="M62 168 L106 158 M194 168 L188 158 M166 154 L194 140 M298 154 L276 140" stroke="rgba(255,180,84,0.50)" stroke-width="1.2" />
-            </g>
-            <g fill="rgba(234,242,255,0.96)">
-              <circle cx="62" cy="36" r="3" /><circle cx="194" cy="36" r="3" /><circle cx="62" cy="168" r="3" /><circle cx="194" cy="168" r="3" />
-              <circle cx="166" cy="22" r="3" /><circle cx="298" cy="22" r="3" /><circle cx="166" cy="154" r="3" /><circle cx="298" cy="154" r="3" />
-              <circle cx="106" cy="76" r="2.4" /><circle cx="188" cy="76" r="2.4" /><circle cx="106" cy="158" r="2.4" /><circle cx="188" cy="158" r="2.4" />
-              <circle cx="194" cy="58" r="2.4" /><circle cx="276" cy="58" r="2.4" /><circle cx="194" cy="140" r="2.4" /><circle cx="276" cy="140" r="2.4" />
-            </g>
-          </svg>
-          <canvas id="fallback-canvas" class="fallback-canvas" aria-hidden="true"></canvas>
-        </div>
-        <pre id="webgl-diagnostic" class="fallback-diagnostic mono" aria-live="polite">Diagnostics loading. If this text stays unchanged, the browser blocked the fallback script before WebGL details could be collected.</pre>
-        <button class="btn" data-scroll="mathematics">Read the mathematics</button>
+      <svg class="fallback-svg" viewBox="0 0 1000 760" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <g fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.82">
+          <rect x="308" y="174" width="260" height="260" stroke="rgba(70,224,240,0.82)" stroke-width="3" />
+          <rect x="478" y="132" width="260" height="260" stroke="rgba(169,139,255,0.78)" stroke-width="3" />
+          <rect x="392" y="256" width="162" height="162" stroke="rgba(255,180,84,0.70)" stroke-width="2.4" />
+          <rect x="536" y="212" width="162" height="162" stroke="rgba(70,224,240,0.54)" stroke-width="2.4" />
+          <path d="M308 174 L478 132 M568 174 L738 132 M308 434 L478 392 M568 434 L738 392" stroke="rgba(91,140,255,0.68)" stroke-width="2.4" />
+          <path d="M392 256 L536 212 M554 256 L698 212 M392 418 L536 374 M554 418 L698 374" stroke="rgba(169,139,255,0.58)" stroke-width="2" />
+          <path d="M308 174 L392 256 M568 174 L554 256 M478 132 L536 212 M738 132 L698 212" stroke="rgba(70,224,240,0.44)" stroke-width="1.8" />
+          <path d="M308 434 L392 418 M568 434 L554 418 M478 392 L536 374 M738 392 L698 374" stroke="rgba(255,180,84,0.46)" stroke-width="1.8" />
+        </g>
+        <g fill="rgba(234,242,255,0.92)" opacity="0.88">
+          <circle cx="308" cy="174" r="5" /><circle cx="568" cy="174" r="5" /><circle cx="308" cy="434" r="5" /><circle cx="568" cy="434" r="5" />
+          <circle cx="478" cy="132" r="5" /><circle cx="738" cy="132" r="5" /><circle cx="478" cy="392" r="5" /><circle cx="738" cy="392" r="5" />
+          <circle cx="392" cy="256" r="4" /><circle cx="554" cy="256" r="4" /><circle cx="392" cy="418" r="4" /><circle cx="554" cy="418" r="4" />
+          <circle cx="536" cy="212" r="4" /><circle cx="698" cy="212" r="4" /><circle cx="536" cy="374" r="4" /><circle cx="698" cy="374" r="4" />
+        </g>
+      </svg>
+      <canvas id="fallback-canvas" class="fallback-canvas" aria-label="2D tesseract projection mode"></canvas>
+      <div class="fallback-grid">
+        <section class="fallback-copy">
+          <span class="fallback-kicker mono">2D projection renderer</span>
+          <h1>Hyperdimensional Atlas</h1>
+          <p>The browser is using the lightweight Canvas renderer for this session. You can still inspect the tesseract as a projection, then continue into the mathematical notes below.</p>
+          <div class="fallback-actions">
+            <button class="btn fallback-primary" data-scroll="mathematics">Read mathematics</button>
+            <button class="btn fallback-secondary" data-scroll="physics">Physics notes</button>
+          </div>
+        </section>
+        <aside class="fallback-inspector" aria-label="2D renderer summary">
+          <span class="panel-eyebrow">Current object</span>
+          <h2>Tesseract</h2>
+          <dl class="fallback-stat-grid">
+            <div><dt>Dimension</dt><dd>4D</dd></div>
+            <div><dt>Vertices</dt><dd>16</dd></div>
+            <div><dt>Edges</dt><dd>32</dd></div>
+            <div><dt>View</dt><dd>2D</dd></div>
+          </dl>
+          <details class="fallback-details">
+            <summary>3D renderer status</summary>
+            <pre id="webgl-diagnostic" class="fallback-diagnostic mono" aria-live="polite">2D renderer active. WebGL details are loading.</pre>
+          </details>
+        </aside>
       </div>
     </div>
 
@@ -263,6 +278,6 @@
     <p class="footer-base mono">© 2026 Biswajit Jana · MIT-licensed source · projections, not photographs · no analytics</p>
   </footer>
 
-  <script type="module" src="js/app.js?v=20260620c"></script>
+  <script type="module" src="js/app.js?v=20260620d"></script>
 </body>
 </html>

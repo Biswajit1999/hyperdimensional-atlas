@@ -353,58 +353,158 @@ input[type="range"]::-moz-range-thumb {
 
 /* WebGL fallback */
 .fallback {
-  position: absolute; inset: 0; z-index: 40;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--bg);
-}
-.fallback-card {
-  width: min(560px, calc(100% - 32px));
-  max-height: calc(100dvh - 64px);
-  overflow: auto;
-  padding: var(--sp-4);
-  border: 1px solid var(--panel-border); border-radius: var(--radius);
-  background: var(--bg-2); text-align: center;
-}
-.fallback-card h2 { margin: 0 0 var(--sp-2); }
-.fallback-card p { margin: 0 auto var(--sp-3); }
-.fallback-visual {
-  position: relative;
-  width: 100%;
-  height: 190px;
-  margin: var(--sp-3) 0;
-  border: 1px solid rgba(120,150,200,0.16);
-  border-radius: 8px;
+  position: absolute;
+  inset: 0;
+  z-index: 40;
   overflow: hidden;
+  display: block;
   background:
-    radial-gradient(70% 90% at 50% 50%, rgba(70,224,240,0.10), transparent 62%),
+    linear-gradient(90deg, rgba(5,6,10,0.92), rgba(5,6,10,0.56) 46%, rgba(5,6,10,0.84)),
+    radial-gradient(70% 80% at 64% 46%, rgba(70,224,240,0.13), transparent 62%),
+    radial-gradient(55% 70% at 80% 18%, rgba(255,180,84,0.06), transparent 60%),
     #05060a;
 }
-.fallback-svg,
+.fallback::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(rgba(120,150,200,0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120,150,200,0.10) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: radial-gradient(72% 72% at 62% 44%, black, transparent);
+}
+.fallback-svg {
+  position: absolute;
+  inset: -6% -4% auto auto;
+  width: min(82vw, 980px);
+  height: min(92vh, 760px);
+  display: block;
+  opacity: 0.45;
+  filter: drop-shadow(0 0 22px rgba(70,224,240,0.22));
+}
 .fallback-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
-}
-.fallback-svg {
-  filter: drop-shadow(0 0 10px rgba(70,224,240,0.28));
-}
-.fallback-canvas {
   pointer-events: none;
 }
-.fallback-diagnostic {
-  margin: var(--sp-3) 0 0;
-  padding: var(--sp-2);
-  max-height: 120px;
-  overflow: auto;
-  text-align: left;
-  white-space: pre-wrap;
-  font-size: 0.68rem;
-  color: var(--ink-faint);
-  background: rgba(255,255,255,0.03);
+.fallback-grid {
+  position: relative;
+  z-index: 2;
+  width: min(1120px, calc(100% - 56px));
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 112px 0 70px;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.92fr) minmax(260px, 360px);
+  gap: clamp(24px, 7vw, 96px);
+  align-items: center;
+}
+.fallback-copy {
+  max-width: 600px;
+  text-shadow: 0 1px 18px rgba(5,6,10,0.82);
+}
+.fallback-kicker {
+  display: block;
+  margin-bottom: var(--sp-2);
+  color: var(--cyan);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.fallback-copy h1 {
+  margin: 0 0 var(--sp-3);
+  max-width: 9ch;
+  font-size: clamp(3rem, 8vw, 6.6rem);
+  line-height: 0.93;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.fallback-copy p {
+  margin: 0;
+  max-width: 55ch;
+  color: var(--ink-dim);
+  font-size: clamp(1rem, 1.7vw, 1.14rem);
+}
+.fallback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}
+.fallback-actions .btn {
+  width: auto;
+  min-width: 150px;
+  margin-top: 0;
+  padding: 10px 14px;
+}
+.fallback-primary {
+  background: rgba(70,224,240,0.14);
+  border-color: rgba(70,224,240,0.34);
+}
+.fallback-secondary {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(120,150,200,0.20);
+  color: var(--ink-dim);
+}
+.fallback-inspector {
+  padding: var(--sp-3);
+  background: rgba(8, 11, 18, 0.70);
+  border: 1px solid rgba(120,150,200,0.18);
+  border-radius: var(--radius);
+  backdrop-filter: blur(14px);
+}
+.fallback-inspector h2 {
+  margin: 2px 0 var(--sp-3);
+  font-size: 1.55rem;
+  line-height: 1.1;
+}
+.fallback-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-3);
+}
+.fallback-stat-grid div {
+  padding: 10px 11px;
   border: 1px solid rgba(120,150,200,0.10);
   border-radius: 8px;
+  background: rgba(255,255,255,0.035);
+}
+.fallback-stat-grid dt {
+  margin: 0;
+  color: var(--ink-faint);
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.fallback-stat-grid dd {
+  margin: 2px 0 0;
+  color: var(--cyan);
+  font-family: var(--mono);
+  font-size: 1rem;
+}
+.fallback-details {
+  border-top: 1px solid rgba(120,150,200,0.12);
+  padding-top: var(--sp-2);
+}
+.fallback-details summary {
+  cursor: pointer;
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+}
+.fallback-diagnostic {
+  margin: var(--sp-2) 0 0;
+  max-height: 110px;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-size: 0.66rem;
+  color: var(--ink-faint);
 }
 .no-webgl .panel, .no-webgl .ladder-wrap, .no-webgl .perf, .no-webgl .fab { display: none; }
 
@@ -546,6 +646,11 @@ input[type="range"]::-moz-range-thumb {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
   gap: var(--sp-5);
 }
+.footer-author,
+.footer-cite,
+.footer-inner > * {
+  min-width: 0;
+}
 .footer-eyebrow {
   display: block;
   font-size: 0.66rem;
@@ -559,6 +664,10 @@ input[type="range"]::-moz-range-thumb {
 .footer-links { font-size: 0.8rem; color: var(--ink-faint); }
 .footer-links .sep { margin: 0 8px; color: var(--ink-faint); }
 .footer-cite .cite-text { margin: 0 0 var(--sp-2); color: var(--ink-dim); font-size: 0.86rem; }
+.footer-links,
+.cite-text {
+  overflow-wrap: anywhere;
+}
 .cite-bibtex {
   margin: 0;
   padding: var(--sp-3);
@@ -598,8 +707,38 @@ input[type="range"]::-moz-range-thumb {
 }
 
 @media (max-width: 760px) {
+  .topnav { padding: var(--sp-2) var(--sp-3); }
   .brand-sub { display: none; }
-  .nav-btn { padding: 6px 8px; font-size: 0.74rem; }
+  .nav-links { margin-left: auto; }
+  .nav-btn { display: none; }
+  .fallback-grid {
+    width: calc(100% - 32px);
+    padding: 88px 0 36px;
+    grid-template-columns: 1fr;
+    gap: var(--sp-4);
+    align-content: start;
+  }
+  .fallback-svg {
+    inset: 7% 0 auto 0;
+    width: 100%;
+    height: 54vh;
+    transform: none;
+    opacity: 0.22;
+  }
+  .fallback-canvas {
+    opacity: 0.68;
+  }
+  .fallback-copy h1 {
+    max-width: 100%;
+    font-size: clamp(2rem, 9.2vw, 3rem);
+    line-height: 0.98;
+  }
+  .fallback-actions .btn {
+    flex: 1 1 150px;
+  }
+  .fallback-inspector {
+    padding: var(--sp-2);
+  }
   .panel {
     top: auto;
     bottom: 0;
