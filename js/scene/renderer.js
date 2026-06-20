@@ -10,24 +10,92 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { createStarfield } from './effects.js';
 import { PALETTE } from '../constants.js';
 
-/**
- * Detect WebGL availability for graceful degradation. Tries webgl2, webgl, and
- * the legacy experimental-webgl context names, since different browsers expose
- * different ones. Each attempt uses a fresh canvas so a failed first attempt
- * cannot poison the next.
- */
-export function isWebGLAvailable() {
-  const names = ['webgl2', 'webgl', 'experimental-webgl'];
-  for (const name of names) {
+const WEBGL_PROFILES = [
+  {
+    label: 'WebGL2 default',
+    name: 'webgl2',
+    attrs: { alpha: false, antialias: true, depth: true, stencil: false, failIfMajorPerformanceCaveat: false, powerPreference: 'default' },
+  },
+  {
+    label: 'WebGL2 safe',
+    name: 'webgl2',
+    attrs: { alpha: false, antialias: false, depth: true, stencil: false, failIfMajorPerformanceCaveat: false, powerPreference: 'default' },
+  },
+  {
+    label: 'WebGL1 safe',
+    name: 'webgl',
+    attrs: { alpha: false, antialias: false, depth: true, stencil: false, failIfMajorPerformanceCaveat: false, powerPreference: 'default' },
+  },
+  {
+    label: 'WebGL1 legacy',
+    name: 'experimental-webgl',
+    attrs: { alpha: false, antialias: false, depth: true, stencil: false, failIfMajorPerformanceCaveat: false },
+  },
+];
+
+export function webGLDiagnostics() {
+  const lines = [];
+  for (const profile of WEBGL_PROFILES) {
     try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext(name, { failIfMajorPerformanceCaveat: false });
-      if (ctx) return true;
-    } catch (e) {
-      // try the next context name
+      const probe = document.createElement('canvas');
+      const ctx = probe.getContext(profile.name, profile.attrs);
+      lines.push(`${profile.label}: ${ctx ? 'available' : 'blocked'}`);
+      if (ctx) {
+        const debug = ctx.getExtension('WEBGL_debug_renderer_info');
+        if (debug) {
+          const vendor = ctx.getParameter(debug.UNMASKED_VENDOR_WEBGL);
+          const renderer = ctx.getParameter(debug.UNMASKED_RENDERER_WEBGL);
+          if (vendor) lines.push(`GPU vendor: ${vendor}`);
+          if (renderer) lines.push(`GPU renderer: ${renderer}`);
+        }
+        break;
+      }
+    } catch (err) {
+      lines.push(`${profile.label}: ${err.message || 'failed'}`);
     }
   }
-  return false;
+  return lines;
+}
+
+function createCompatibleRenderer(canvas) {
+  const failures = [];
+  for (const profile of WEBGL_PROFILES) {
+    try {
+      const testCanvas = document.createElement('canvas');
+      const testContext = testCanvas.getContext(profile.name, profile.attrs);
+      if (!testContext) {
+        failures.push(`${profile.label}: context blocked`);
+        continue;
+      }
+
+      const testRenderer = new THREE.WebGLRenderer({
+        canvas: testCanvas,
+        context: testContext,
+        alpha: false,
+        antialias: profile.attrs.antialias,
+        powerPreference: profile.attrs.powerPreference || 'default',
+      });
+      testRenderer.dispose();
+
+      const context = canvas.getContext(profile.name, profile.attrs);
+      if (!context) {
+        failures.push(`${profile.label}: live canvas context blocked`);
+        continue;
+      }
+
+      return new THREE.WebGLRenderer({
+        canvas,
+        context,
+        alpha: false,
+        antialias: profile.attrs.antialias,
+        powerPreference: profile.attrs.powerPreference || 'default',
+      });
+    } catch (err) {
+      failures.push(`${profile.label}: ${err.message || err}`);
+    }
+  }
+
+  throw new Error(`Unable to start WebGL renderer. ${failures.join(' | ')}`);
 }
 
 export class SceneManager {
@@ -48,12 +116,7 @@ export class SceneManager {
     this.camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 200);
     this.camera.position.set(0, 0.4, 7);
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: false,
-      powerPreference: 'high-performance',
-    });
+    this.renderer = createCompatibleRenderer(canvas);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(w, h, false);
 

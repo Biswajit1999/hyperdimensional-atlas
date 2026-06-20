@@ -7,7 +7,7 @@
   <meta name="color-scheme" content="dark" />
   <title>Hyperdimensional Atlas — geometry beyond perception</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=20260620b" />
 
   <!-- Pinned Three.js via import map. Single consistent version, no bundler. -->
   <script type="importmap">
@@ -44,9 +44,12 @@
     <!-- WebGL fallback -->
     <div id="webgl-fallback" class="fallback" hidden>
       <div class="fallback-card">
-        <h2>WebGL is unavailable</h2>
-        <p>This visualisation needs WebGL, which your browser or device does not currently
-        support. The mathematics, formulas, and written sections below remain fully readable.</p>
+        <h2>2D fallback mode</h2>
+        <p>Your browser blocked the GPU-powered WebGL view, so this page is showing a
+        Canvas 2D projection fallback. The full atlas works after WebGL or hardware
+        acceleration is enabled.</p>
+        <canvas id="fallback-canvas" class="fallback-canvas" aria-label="2D tesseract fallback preview"></canvas>
+        <pre id="webgl-diagnostic" class="fallback-diagnostic mono" aria-live="polite"></pre>
         <button class="btn" data-scroll="mathematics">Read the mathematics</button>
       </div>
     </div>
@@ -240,6 +243,6 @@
     <p class="footer-base mono">© 2026 Biswajit Jana · MIT-licensed source · projections, not photographs · no analytics</p>
   </footer>
 
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/app.js?v=20260620b"></script>
 </body>
 </html>

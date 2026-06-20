@@ -13,7 +13,7 @@ import { rotateInPlane, rotationPresets, planeRate } from './math/rotation.js';
 import { project, hiddenDepth } from './math/projection.js';
 import { getStats, faceCount } from './math/statistics.js';
 import { ALL_DIMENSIONS, dimensionData } from './data.js';
-import { SceneManager } from './scene/renderer.js';
+import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260620b';
 import { createMaterials } from './scene/materials.js';
 import { HypercubeObject } from './scene/geometry.js';
 import { depthColor } from './scene/materials.js';
@@ -23,6 +23,8 @@ import { buildNarrative } from './ui/narrative.js';
 
 const prefersReducedMotion =
   window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const forceFallback =
+  new URLSearchParams(window.location.search).has('fallback');
 
 // ---- Shared state ----------------------------------------------------------
 const state = structuredClone(DEFAULTS);
@@ -34,39 +36,44 @@ if (prefersReducedMotion) state.autoRotate = false;
 // So we attempt the real scene and only fall back if it genuinely throws.
 const canvas = document.getElementById('scene');
 let scene, materials, hypercube;
+let webglReady = true;
 try {
+  if (forceFallback) throw new Error('Fallback preview requested by URL');
   scene = new SceneManager(canvas, { reducedMotion: prefersReducedMotion });
   materials = createMaterials();
   hypercube = new HypercubeObject(scene.scene, materials);
 } catch (err) {
   console.warn('Hyperdimensional Atlas — WebGL scene unavailable:', err);
-  document.getElementById('webgl-fallback').hidden = false;
-  document.getElementById('stage').classList.add('no-webgl');
-  throw err; // stop here; the written sections below remain readable
+  webglReady = false;
+  showWebGLFallback(err);
 }
 
 // ---- UI --------------------------------------------------------------------
-const inspector = new Inspector(document.getElementById('inspector'));
+let inspector = null;
+let controls = null;
 
-const controls = new Controls(
-  {
-    panel: document.getElementById('controls'),
-    ladder: document.getElementById('ladder'),
-    captionEl: document.getElementById('ladder-caption'),
-    perf: {
-      fps: document.getElementById('perf-fps'),
-      verts: document.getElementById('perf-verts'),
-      edges: document.getElementById('perf-edges'),
-      dim: document.getElementById('perf-dim'),
+if (webglReady) {
+  inspector = new Inspector(document.getElementById('inspector'));
+  controls = new Controls(
+    {
+      panel: document.getElementById('controls'),
+      ladder: document.getElementById('ladder'),
+      captionEl: document.getElementById('ladder-caption'),
+      perf: {
+        fps: document.getElementById('perf-fps'),
+        verts: document.getElementById('perf-verts'),
+        edges: document.getElementById('perf-edges'),
+        dim: document.getElementById('perf-dim'),
+      },
     },
-  },
-  state,
-  {
-    onChange: handleChange,
-    onResetView: resetView,
-    onTogglePanels: togglePanels,
-  },
-);
+    state,
+    {
+      onChange: handleChange,
+      onResetView: resetView,
+      onTogglePanels: togglePanels,
+    },
+  );
+}
 
 const diagrams = buildNarrative(document.getElementById('narrative'), prefersReducedMotion);
 
@@ -219,6 +226,95 @@ function setupNav() {
   if (tr) tr.addEventListener('click', () => document.body.classList.toggle('show-right'));
 }
 
+function showWebGLFallback(err) {
+  const fallback = document.getElementById('webgl-fallback');
+  const stage = document.getElementById('stage');
+  if (fallback) fallback.hidden = false;
+  if (stage) stage.classList.add('no-webgl');
+
+  const diagnostic = document.getElementById('webgl-diagnostic');
+  if (diagnostic) {
+    const lines = [
+      `Renderer error: ${err?.message || 'unknown failure'}`,
+      ...webGLDiagnostics(),
+      'Fix: enable browser hardware acceleration / WebGL, then reload.',
+    ];
+    diagnostic.textContent = lines.join('\n');
+  }
+
+  startFallbackPreview();
+}
+
+function startFallbackPreview() {
+  const preview = document.getElementById('fallback-canvas');
+  const ctx = preview && preview.getContext('2d');
+  if (!ctx) return;
+
+  const verts = generateVertices(4);
+  const edges = generateEdges(4);
+  const out = [0, 0, 0];
+  let lastFrame = performance.now();
+
+  function draw(now) {
+    const rect = preview.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const width = Math.max(1, Math.round(rect.width));
+    const height = Math.max(1, Math.round(rect.height));
+    if (preview.width !== width * dpr || preview.height !== height * dpr) {
+      preview.width = width * dpr;
+      preview.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    lastFrame = now;
+    const a = prefersReducedMotion ? 0.65 : now * 0.00035;
+    const b = prefersReducedMotion ? 0.25 : now * 0.00022;
+    const pts = verts.map((v0) => {
+      const v = Float64Array.from(v0);
+      rotateInPlane(v, 0, 3, Math.cos(a), Math.sin(a));
+      rotateInPlane(v, 1, 2, Math.cos(b), Math.sin(b));
+      project(v, 4, 'perspective', 3.2, out);
+      return [out[0], out[1], out[2], v[3]];
+    });
+
+    ctx.clearRect(0, 0, width, height);
+    const grd = ctx.createRadialGradient(width / 2, height / 2, 10, width / 2, height / 2, Math.max(width, height) / 2);
+    grd.addColorStop(0, 'rgba(70,224,240,0.16)');
+    grd.addColorStop(1, 'rgba(5,6,10,0.02)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, width, height);
+
+    const scale = Math.min(width, height) * 0.24;
+    const cx = width / 2;
+    const cy = height / 2;
+    const toScreen = (p) => [cx + p[0] * scale, cy - p[1] * scale];
+
+    ctx.lineWidth = 1.1;
+    for (const [i, j] of edges) {
+      const p = toScreen(pts[i]);
+      const q = toScreen(pts[j]);
+      const depth = (pts[i][3] + pts[j][3]) / 2;
+      ctx.strokeStyle = depth < 0 ? 'rgba(169,139,255,0.9)' : 'rgba(70,224,240,0.9)';
+      ctx.beginPath();
+      ctx.moveTo(p[0], p[1]);
+      ctx.lineTo(q[0], q[1]);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = 'rgba(234,242,255,0.95)';
+    for (const p0 of pts) {
+      const p = toScreen(p0);
+      ctx.beginPath();
+      ctx.arc(p[0], p[1], 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (!prefersReducedMotion) requestAnimationFrame(draw);
+  }
+
+  requestAnimationFrame(draw);
+}
+
 // ---- Main loop -------------------------------------------------------------
 let last = performance.now();
 let fpsAccum = 0;
@@ -257,13 +353,28 @@ function loop(now) {
 }
 
 // ---- Boot ------------------------------------------------------------------
-rebuildTopology();
-inspector.update(state);
-updateMathTable(state.dimension);
-buildGrowthTable();
-setupNav();
-controls.setPerf(60, vertexCount(state.dimension), edgeCount(state.dimension));
-requestAnimationFrame(loop);
+if (webglReady) {
+  rebuildTopology();
+  inspector.update(state);
+  updateMathTable(state.dimension);
+  buildGrowthTable();
+  setupNav();
+  controls.setPerf(60, vertexCount(state.dimension), edgeCount(state.dimension));
+  requestAnimationFrame(loop);
+} else {
+  updateMathTable(state.dimension);
+  buildGrowthTable();
+  setupNav();
+
+  let fallbackLast = performance.now();
+  const fallbackLoop = (now) => {
+    const dt = Math.min(Math.max((now - fallbackLast) / 1000, 0), 0.1);
+    fallbackLast = now;
+    diagrams.forEach((d) => d.step(dt));
+    requestAnimationFrame(fallbackLoop);
+  };
+  requestAnimationFrame(fallbackLoop);
+}
 
 // Expose a tiny handle for debugging in the console (no analytics, no network).
 window.__atlas = { state, scene };
