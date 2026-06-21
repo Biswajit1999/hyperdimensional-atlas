@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0" />
-  <meta name="description" content="Hyperdimensional Atlas — an interactive visual laboratory for the geometry of hypercubes from 0D to 8D. Explore projections, rotations, and cross-sections of n-dimensional cubes." />
+  <meta name="description" content="Hyperdimensional Atlas — an interactive visual laboratory for hypercubes from 0D to 50D, with full rendering through 8D and analytical sampled previews beyond." />
   <meta name="color-scheme" content="dark" />
   <title>Hyperdimensional Atlas — geometry beyond perception</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="styles.css?v=20260621a" />
+  <link rel="stylesheet" href="styles.css?v=20260621b" />
 
   <!-- Pinned Three.js via import map. Single consistent version, no bundler. -->
   <script type="importmap">
@@ -40,17 +40,18 @@
   <!-- Interactive stage -->
   <main id="stage" class="stage">
     <canvas id="scene" aria-label="Interactive hypercube projection"></canvas>
+    <canvas id="ambient-field" class="ambient-field" aria-hidden="true"></canvas>
 
     <section class="stage-intro" aria-labelledby="stage-heading">
       <span class="stage-kicker mono">Interactive n-cube atlas</span>
       <h1 id="stage-heading">Geometry beyond perception</h1>
-      <p>Rotate, slice, and project exact hypercubes from 0D to 8D. The model is live; the mathematics below stays tied to the object on screen.</p>
+      <p>Rotate exact hypercubes through 8D, then push into sampled analytical previews up to 50D without losing the real combinatorics.</p>
       <div class="stage-actions">
         <button class="stage-action primary" data-scroll="from-point-to-hypercube">Begin with construction</button>
         <button class="stage-action ghost" data-scroll="mathematics">Read formulas</button>
       </div>
       <dl class="stage-metrics" aria-label="Atlas summary">
-        <div><dt>Range</dt><dd>0D-8D</dd></div>
+        <div><dt>Range</dt><dd>0D-50D</dd></div>
         <div><dt>Default</dt><dd>4D</dd></div>
         <div><dt>Edges</dt><dd>1024 max</dd></div>
       </dl>
@@ -173,14 +174,14 @@
       <div class="table-pair">
         <div class="table-block">
           <h3 id="combinatorics-title">Combinatorics</h3>
-          <p class="table-note">Face vector for the dimension selected above — updates live.</p>
+        <p class="table-note">Face vector for the dimension selected above — updates live. Above 8D the screen uses a sampled preview, while the counts remain for the full n-cube.</p>
           <table class="data-table">
             <thead><tr><th>k</th><th>face type</th><th>count</th></tr></thead>
             <tbody id="combinatorics-body"></tbody>
           </table>
         </div>
         <div class="table-block">
-          <h3>Dimensional growth, 0D → 8D</h3>
+          <h3>Dimensional growth, 0D → 50D milestones</h3>
           <p class="table-note">Vertices double each step; higher faces follow the binomial rule.</p>
           <table class="data-table">
             <thead><tr><th>dim</th><th>name</th><th>V</th><th>E</th><th>squares</th><th>cells</th></tr></thead>
@@ -277,13 +278,13 @@
       </div>
       <div class="footer-cite">
         <span class="footer-eyebrow mono">How to cite</span>
-        <p class="cite-text">Jana, B. (2026). <em>Hyperdimensional Atlas: an interactive visual
-        laboratory for the geometry of hypercubes (0D–8D)</em> [Web application].
+          <p class="cite-text">Jana, B. (2026). <em>Hyperdimensional Atlas: an interactive visual
+        laboratory for the geometry of hypercubes (0D–50D)</em> [Web application].
         https://biswajit1999.github.io/hyperdimensional-atlas/</p>
         <pre class="cite-bibtex mono">@misc{jana2026hyperatlas,
   author = {Jana, Biswajit},
   title  = {Hyperdimensional Atlas: an interactive visual laboratory
-            for the geometry of hypercubes (0D--8D)},
+            for the geometry of hypercubes (0D--50D)},
   year   = {2026},
   note   = {Web application},
   url    = {https://biswajit1999.github.io/hyperdimensional-atlas/}
@@ -293,6 +294,6 @@
     <p class="footer-base mono">© 2026 Biswajit Jana · MIT-licensed source · projections, not photographs · no analytics</p>
   </footer>
 
-  <script type="module" src="js/app.js?v=20260621a"></script>
+  <script type="module" src="js/app.js?v=20260621b"></script>
 </body>
 </html>

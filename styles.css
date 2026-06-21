@@ -26,7 +26,10 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
 
 body {
   margin: 0;
@@ -131,17 +134,38 @@ a:hover { text-decoration: underline; }
   mask-image: linear-gradient(90deg, black, transparent 72%);
 }
 #scene { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; display: block; }
+.ambient-field {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0.82;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
 
 .stage-intro {
   position: absolute;
   z-index: 12;
-  top: clamp(112px, 18vh, 156px);
-  left: clamp(332px, 28vw, 440px);
-  width: min(430px, calc(100vw - 720px));
-  min-width: 330px;
+  top: clamp(118px, 16vh, 152px);
+  left: clamp(340px, 23vw, 430px);
+  width: min(470px, calc(100vw - 820px));
+  min-width: 360px;
   color: var(--ink);
   text-shadow: 0 1px 20px rgba(3,5,7,0.72);
   pointer-events: auto;
+}
+.stage-intro::before {
+  content: "";
+  position: absolute;
+  inset: -26px -34px -30px -28px;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(3,5,7,0.86), rgba(3,5,7,0.56) 58%, transparent);
+  border-left: 1px solid rgba(134,240,184,0.18);
+  filter: blur(0);
 }
 .stage-kicker {
   display: block;
@@ -154,14 +178,14 @@ a:hover { text-decoration: underline; }
 .stage-intro h1 {
   margin: 0 0 var(--sp-3);
   max-width: 10ch;
-  font-size: clamp(2.8rem, 5vw, 4.8rem);
+  font-size: clamp(2.8rem, 4.6vw, 4.55rem);
   line-height: 0.94;
   font-weight: 720;
   letter-spacing: 0;
 }
 .stage-intro p {
   margin: 0;
-  max-width: 42ch;
+  max-width: 46ch;
   color: var(--ink-dim);
   font-size: 0.98rem;
   line-height: 1.65;
@@ -276,6 +300,12 @@ a:hover { text-decoration: underline; }
 }
 .control-label.sub { margin-top: var(--sp-2); font-size: 0.72rem; color: var(--ink-faint); }
 .control-label output { color: var(--cyan); }
+.control-note {
+  margin: 8px 0 0;
+  color: var(--ink-faint);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
 
 input[type="range"] {
   width: 100%;
@@ -360,18 +390,25 @@ input[type="range"]::-moz-range-thumb {
 .insp-sub .dot { margin: 0 6px; }
 .insp-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--sp-2);
   margin: var(--sp-3) 0;
 }
 .insp-grid div {
+  min-width: 0;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(120,150,200,0.1);
   border-radius: 8px;
   padding: 9px 11px;
 }
 .insp-grid dt { font-size: 0.66rem; color: var(--ink-faint); letter-spacing: 0.06em; text-transform: uppercase; margin: 0; }
-.insp-grid dd { margin: 3px 0 0; font-size: 1.04rem; color: var(--cyan); }
+.insp-grid dd {
+  margin: 3px 0 0;
+  font-size: clamp(0.78rem, 1.1vw, 1.04rem);
+  line-height: 1.28;
+  color: var(--cyan);
+  overflow-wrap: anywhere;
+}
 .insp-block { border-top: 1px solid rgba(120,150,200,0.1); padding-top: var(--sp-2); margin-top: var(--sp-2); }
 .insp-block h3 { margin: 0 0 4px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-faint); }
 .insp-text { margin: 0; font-size: 0.84rem; color: var(--ink-dim); line-height: 1.55; }
@@ -637,10 +674,12 @@ input[type="range"]::-moz-range-thumb {
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.7s ease, transform 0.7s ease;
+  scroll-margin-top: 88px;
 }
 .narrative-section.visible { opacity: 1; transform: none; }
 .narrative-inner, .doc-inner { max-width: var(--maxw); margin: 0 auto; }
-.doc-inner.narrow, .narrative-inner { max-width: 820px; }
+.doc-inner.narrow { max-width: 820px; }
+.narrative-inner { max-width: 960px; }
 
 .kicker {
   display: block;
@@ -675,7 +714,7 @@ input[type="range"]::-moz-range-thumb {
 .mini { margin: var(--sp-3) 0; }
 .mini-canvas {
   width: 100%;
-  height: 240px;
+  height: clamp(260px, 32vw, 340px);
   display: block;
   background: radial-gradient(80% 80% at 50% 45%, rgba(20,26,42,0.6), rgba(6,8,14,0.2));
   border: 1px solid rgba(120,150,200,0.12);
@@ -683,7 +722,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* Doc sections (Mathematics, Physics, About) */
-.doc-section { padding: var(--sp-6) var(--sp-4); position: relative; z-index: 5; background: var(--bg); border-top: 1px solid rgba(120,150,200,0.08); }
+.doc-section { padding: var(--sp-6) var(--sp-4); position: relative; z-index: 5; background: var(--bg); border-top: 1px solid rgba(120,150,200,0.08); scroll-margin-top: 88px; }
 .doc-section.alt { background: var(--bg-2); }
 .lede { font-size: 1.05rem; color: var(--ink); }
 

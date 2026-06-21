@@ -5,7 +5,7 @@
 
 import { getStats } from './math/statistics.js';
 
-// Names of the measure-polytope (n-cube) in each dimension.
+// Names of the measure-polytope (n-cube) in each low dimension.
 export const DIMENSION_NAMES = [
   'Point',        // 0
   'Line segment', // 1
@@ -38,18 +38,34 @@ export const SCHLAFLI = [
   '{4, 3, 3, 3, 3, 3, 3}', // 8  octeract
 ];
 
+export const LADDER_DIMS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 30, 40, 50];
+
+export function dimensionName(n) {
+  return DIMENSION_NAMES[n] || `${n}D hypercube`;
+}
+
+export function nCubeName(n) {
+  return DIMENSION_NCUBE[n] || `${n}-cube`;
+}
+
+export function schlafliSymbol(n) {
+  if (SCHLAFLI[n]) return SCHLAFLI[n];
+  return `{4, 3^${n - 2}}`;
+}
+
 /**
  * Assemble the complete data record for one dimension.
  */
 export function dimensionData(n) {
   return {
     n,
-    name: DIMENSION_NAMES[n],
-    ncube: DIMENSION_NCUBE[n],
-    schlafli: SCHLAFLI[n],
+    name: dimensionName(n),
+    ncube: nCubeName(n),
+    schlafli: schlafliSymbol(n),
     stats: getStats(n),
   };
 }
 
-// Pre-built array for ladder construction (0..8).
-export const ALL_DIMENSIONS = Array.from({ length: 9 }, (_, n) => dimensionData(n));
+// Pre-built arrays for the full control range and the compact milestone ladder.
+export const ALL_DIMENSIONS = Array.from({ length: 51 }, (_, n) => dimensionData(n));
+export const LADDER_DIMENSIONS = LADDER_DIMS.map((n) => dimensionData(n));

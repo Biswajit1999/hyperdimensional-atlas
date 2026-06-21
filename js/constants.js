@@ -3,7 +3,9 @@
 // it can be imported anywhere without side effects.
 
 export const DIM_MIN = 0;
-export const DIM_MAX = 8;
+export const DIM_MAX = 50;
+export const FULL_RENDER_DIM_MAX = 8;
+export const HIGH_DIM_PREVIEW_AXES = 8;
 export const DEFAULT_DIM = 4;
 
 // "Obsidian Observatory" palette. Hex strings for CSS, numbers for Three.js.

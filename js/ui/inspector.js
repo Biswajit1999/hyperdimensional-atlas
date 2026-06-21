@@ -3,8 +3,9 @@
 // combinatorics, measures, and a plain-language description. Pure DOM updates.
 
 import { dimensionData } from '../data.js';
-import { DIMENSION_BLURB, PROJECTION_EXPLAIN } from '../content.js';
+import { dimensionBlurb, PROJECTION_EXPLAIN } from '../content.js';
 import { perspectiveWarning } from '../math/projection.js';
+import { FULL_RENDER_DIM_MAX, HIGH_DIM_PREVIEW_AXES } from '../constants.js';
 
 export class Inspector {
   constructor(root) {
@@ -40,6 +41,11 @@ export class Inspector {
         <p id="insp-blurb" class="insp-text"></p>
       </section>
 
+      <section class="insp-block" id="insp-preview-block" hidden>
+        <h3>High-dimensional preview</h3>
+        <p id="insp-preview" class="insp-text"></p>
+      </section>
+
       <section class="insp-block" id="insp-slice-block" hidden>
         <h3>Cross-section</h3>
         <p id="insp-slice" class="insp-text"></p>
@@ -59,6 +65,8 @@ export class Inspector {
       proj: this.root.querySelector('#insp-proj'),
       warn: this.root.querySelector('#insp-warn'),
       blurb: this.root.querySelector('#insp-blurb'),
+      previewBlock: this.root.querySelector('#insp-preview-block'),
+      preview: this.root.querySelector('#insp-preview'),
       sliceBlock: this.root.querySelector('#insp-slice-block'),
       slice: this.root.querySelector('#insp-slice'),
     };
@@ -75,15 +83,24 @@ export class Inspector {
     this.el.name.textContent = d.name;
     this.el.ncube.textContent = d.ncube;
     this.el.schlafli.textContent = d.schlafli;
-    this.el.v.textContent = s.vertices.toLocaleString();
-    this.el.e.textContent = s.edges.toLocaleString();
-    this.el.sq.textContent = s.squares.toLocaleString();
-    this.el.cu.textContent = s.cubes.toLocaleString();
+    setCount(this.el.v, s.vertices);
+    setCount(this.el.e, s.edges);
+    setCount(this.el.sq, s.squares);
+    setCount(this.el.cu, s.cubes);
     this.el.hv.textContent = s.hypervolume;
     this.el.bd.textContent = s.boundary;
 
     this.el.proj.textContent = PROJECTION_EXPLAIN[state.projection];
-    this.el.blurb.textContent = DIMENSION_BLURB[n];
+    this.el.blurb.textContent = dimensionBlurb(n);
+
+    if (n > FULL_RENDER_DIM_MAX) {
+      this.el.previewBlock.hidden = false;
+      this.el.preview.textContent =
+        `The screen shows a deterministic ${HIGH_DIM_PREVIEW_AXES}-axis skeleton embedded in ${n}D. ` +
+        `The counts above describe the full ${n}-cube.`;
+    } else {
+      this.el.previewBlock.hidden = true;
+    }
 
     const warn = perspectiveWarning(n, state.focalLength) && state.projection !== 'orthographic';
     this.el.warn.hidden = !warn;
@@ -106,4 +123,14 @@ export class Inspector {
 
 function coordName(i) {
   return i < 3 ? ['x', 'y', 'z'][i] : `q${i + 1}`;
+}
+
+function setCount(el, value) {
+  el.textContent = compactCount(value);
+  el.title = value.toLocaleString();
+}
+
+function compactCount(value) {
+  if (value < 1_000_000_000) return value.toLocaleString();
+  return value.toExponential(2).replace('e+', 'e');
 }

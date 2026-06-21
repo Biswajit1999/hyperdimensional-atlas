@@ -20,6 +20,17 @@ export function binomial(n, k) {
   return Math.round(result);
 }
 
+export function binomialBigInt(n, k) {
+  if (k < 0 || k > n) return 0n;
+  if (k === 0 || k === n) return 1n;
+  k = Math.min(k, n - k);
+  let result = 1n;
+  for (let i = 0; i < k; i++) {
+    result = (result * BigInt(n - i)) / BigInt(i + 1);
+  }
+  return result;
+}
+
 /**
  * Number of k-dimensional faces of an n-cube:  C(n, k) * 2^(n-k).
  * k = 0 vertices, k = 1 edges, k = 2 squares, k = 3 cubic cells, ...
@@ -29,10 +40,19 @@ export function faceCount(n, k) {
   return binomial(n, k) * Math.pow(2, n - k);
 }
 
+export function faceCountExact(n, k) {
+  if (k < 0 || k > n) return 0n;
+  return binomialBigInt(n, k) * (2n ** BigInt(n - k));
+}
+
+export function formatCount(value) {
+  return value.toLocaleString();
+}
+
 /** Superscript helper for compact "s^n" style strings. */
 function sup(n) {
   const map = { '0': '⁰', '1': '¹', '2': '²', '3': '³',
-    '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸' };
+    '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
   return String(n).split('').map((d) => map[d] ?? d).join('');
 }
 

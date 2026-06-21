@@ -25,8 +25,8 @@ function effectiveFocal(focal, n) {
   return Math.max(focal, Math.sqrt(n) + FOCAL_MARGIN);
 }
 
-// Reused scratch buffer (max 8 dimensions). Avoids per-call allocation.
-const projectScratch = new Float64Array(8);
+// Reused scratch buffer (max 50 dimensions plus breathing room). Avoids per-call allocation.
+const projectScratch = new Float64Array(64);
 
 /**
  * Project one coordinate vector to a 3D [x, y, z] array.

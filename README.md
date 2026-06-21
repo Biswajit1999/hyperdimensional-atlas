@@ -1,6 +1,6 @@
 # Hyperdimensional Atlas
 
-**An interactive visual laboratory for geometry beyond three dimensions** — explore the projected shadows, rotations, and cross-sections of hypercubes from 0D to 8D, entirely in the browser.
+**An interactive visual laboratory for geometry beyond three dimensions** — explore projected shadows, rotations, and cross-sections of hypercubes from 0D to 50D, with exact full rendering through 8D and sampled analytical previews beyond.
 
 ---
 
@@ -12,10 +12,10 @@ What you see here are **projections**, not direct views. A four-dimensional cube
 
 ## Features
 
-- **Dimensions 0–8.** Point, line, square, cube, tesseract, penteract, hexeract, hepteract, octeract — each generated from first principles, not drawn by hand.
+- **Dimensions 0–50.** Full vertex/edge rendering is exact through 8D; 9D–50D uses a deterministic sampled skeleton while keeping exact combinatoric counts visible.
 - **Three projection modes:** orthographic, perspective, and a staged sequential projection for high dimensions.
 - **True plane rotations.** Rotations happen in coordinate planes (not around axes), with single- and multi-plane presets for every dimension.
-- **Cross-section explorer.** Slice an n-cube with a fixed-coordinate hyperplane and watch it reduce to an (n−1)-cube.
+- **Cross-section explorer.** Slice an n-cube through 8D with a fixed-coordinate hyperplane and watch it reduce to an (n−1)-cube.
 - **Hidden-dimension colour encoding** as a reading aid (clearly labelled as a visual cue, not a physical property).
 - **Live scientific inspector:** object name, Schläfli symbol, vertex/edge/face/cell counts, hypervolume, and boundary measure that update with the dimension.
 - **Atmosphere** built procedurally with CSS, a Three.js starfield, and gentle bloom — no stock images.
@@ -121,13 +121,13 @@ Built and maintained by **Biswajit Jana** — research in exoplanet instrumentat
 
 If you use or reference this work, please cite it as:
 
-> Jana, B. (2026). *Hyperdimensional Atlas: an interactive visual laboratory for the geometry of hypercubes (0D–8D)* [Web application]. https://biswajit1999.github.io/hyperdimensional-atlas/
+> Jana, B. (2026). *Hyperdimensional Atlas: an interactive visual laboratory for the geometry of hypercubes (0D–50D)* [Web application]. https://biswajit1999.github.io/hyperdimensional-atlas/
 
 ```bibtex
 @misc{jana2026hyperatlas,
   author = {Jana, Biswajit},
   title  = {Hyperdimensional Atlas: an interactive visual laboratory
-            for the geometry of hypercubes (0D--8D)},
+            for the geometry of hypercubes (0D--50D)},
   year   = {2026},
   note   = {Web application},
   url    = {https://biswajit1999.github.io/hyperdimensional-atlas/}

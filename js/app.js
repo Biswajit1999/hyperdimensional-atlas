@@ -5,15 +5,15 @@
 // the existing buffers.
 
 import * as THREE from 'three';
-import { DEFAULTS, RENDER_SCALE } from './constants.js';
+import { DEFAULTS, FULL_RENDER_DIM_MAX, HIGH_DIM_PREVIEW_AXES, RENDER_SCALE } from './constants.js';
 import {
-  generateVertices, generateEdges, sliceCube, vertexCount, edgeCount,
+  generateVertices, generateEdges, generatePreviewSkeleton, sliceCube, vertexCount, edgeCount,
 } from './math/hypercube.js';
 import { rotateInPlane, rotationPresets, planeRate } from './math/rotation.js';
 import { project, hiddenDepth } from './math/projection.js';
-import { getStats, faceCount } from './math/statistics.js';
-import { ALL_DIMENSIONS, dimensionData } from './data.js';
-import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260621a';
+import { getStats, faceCountExact, formatCount } from './math/statistics.js';
+import { LADDER_DIMENSIONS, dimensionData } from './data.js';
+import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260621b';
 import { createMaterials } from './scene/materials.js';
 import { HypercubeObject } from './scene/geometry.js';
 import { depthColor } from './scene/materials.js';
@@ -81,7 +81,7 @@ const diagrams = buildNarrative(document.getElementById('narrative'), prefersRed
 let base = { vertices: [], edges: [], n: -1 };
 let projectedPos = new Float32Array(3);
 let colorBuf = new Float32Array(3);
-let scratch = new Float64Array(8);
+let scratch = new Float64Array(64);
 const colorTmp = new THREE.Color();
 const out3 = [0, 0, 0];
 
@@ -99,7 +99,11 @@ function activePlanes() {
 // Rebuild base vertex/edge data and reallocate GPU buffers.
 function rebuildTopology() {
   const n = state.dimension;
-  if (state.slice.enabled && n >= 1) {
+  if (n > FULL_RENDER_DIM_MAX) {
+    state.slice.enabled = false;
+    const preview = generatePreviewSkeleton(n, HIGH_DIM_PREVIEW_AXES);
+    base = { vertices: preview.vertices, edges: preview.edges, n, preview: true };
+  } else if (state.slice.enabled && n >= 1) {
     const axis = Math.min(state.slice.axis, Math.max(n - 1, 0));
     const r = sliceCube(n, axis, state.slice.position);
     base = { vertices: r.vertices, edges: r.edges, n };
@@ -178,6 +182,15 @@ function togglePanels() {
   document.body.classList.toggle('panels-hidden', !state.showPanels);
 }
 
+function applyStageComposition() {
+  if (!hypercube) return;
+  const wide = window.innerWidth >= 1180;
+  hypercube.object3d.position.set(wide ? 1.35 : 0, wide ? -0.04 : 0, 0);
+  hypercube.object3d.scale.setScalar(wide ? 0.96 : 0.9);
+}
+
+window.addEventListener('resize', applyStageComposition);
+
 // ---- Mathematics section tables -------------------------------------------
 function updateMathTable(n) {
   const tbody = document.getElementById('combinatorics-body');
@@ -189,7 +202,7 @@ function updateMathTable(n) {
   let rows = '';
   for (let k = 0; k <= n; k++) {
     const label = ['vertices', 'edges', 'squares', 'cubic cells'][k] || `${k}-faces`;
-    rows += `<tr><td class="mono">${k}</td><td>${label}</td><td class="mono">${faceCount(n, k).toLocaleString()}</td></tr>`;
+    rows += `<tr><td class="mono">${k}</td><td>${label}</td><td class="mono">${formatCount(faceCountExact(n, k))}</td></tr>`;
   }
   tbody.innerHTML = rows;
   document.getElementById('formula-vertices').textContent = stats.vertices.toLocaleString();
@@ -199,7 +212,7 @@ function updateMathTable(n) {
 function buildGrowthTable() {
   const tbody = document.getElementById('growth-body');
   if (!tbody) return;
-  tbody.innerHTML = ALL_DIMENSIONS.map((d) => {
+  tbody.innerHTML = LADDER_DIMENSIONS.map((d) => {
     const s = d.stats;
     return `<tr>
       <td class="mono">${d.n}D</td>
@@ -224,6 +237,96 @@ function setupNav() {
   const tr = document.getElementById('toggle-right');
   if (tl) tl.addEventListener('click', () => document.body.classList.toggle('show-left'));
   if (tr) tr.addEventListener('click', () => document.body.classList.toggle('show-right'));
+}
+
+function startAmbientField() {
+  const ambient = document.getElementById('ambient-field');
+  const ctx = ambient && ambient.getContext('2d');
+  if (!ctx) return;
+
+  const particles = Array.from({ length: prefersReducedMotion ? 42 : 88 }, (_, i) => ({
+    x: (i * 0.61803398875) % 1,
+    y: (i * 0.41421356237) % 1,
+    r: 0.5 + ((i * 17) % 9) * 0.08,
+    speed: 0.006 + ((i * 13) % 11) * 0.0014,
+    hue: i % 5,
+  }));
+
+  let width = 1;
+  let height = 1;
+  let dpr = 1;
+
+  function resizeAmbient() {
+    const rect = ambient.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = Math.max(1, Math.round(rect.width));
+    height = Math.max(1, Math.round(rect.height));
+    ambient.width = width * dpr;
+    ambient.height = height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function draw(now) {
+    resizeAmbient();
+    ctx.clearRect(0, 0, width, height);
+    ctx.globalCompositeOperation = 'lighter';
+
+    const t = prefersReducedMotion ? 10 : now * 0.001;
+    const palette = [
+      'rgba(81,240,229,0.62)',
+      'rgba(134,240,184,0.50)',
+      'rgba(111,156,255,0.46)',
+      'rgba(184,140,255,0.42)',
+      'rgba(245,189,99,0.38)',
+    ];
+
+    for (let rail = 0; rail < 5; rail++) {
+      const y = ((rail * 0.21 + t * 0.018) % 1) * height;
+      ctx.strokeStyle = rail % 2 ? 'rgba(81,240,229,0.08)' : 'rgba(245,189,99,0.06)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(width * 0.08, y);
+      ctx.lineTo(width * 0.94, y - height * (0.18 + rail * 0.025));
+      ctx.stroke();
+    }
+
+    const pts = particles.map((p, i) => {
+      const drift = prefersReducedMotion ? 0 : t * p.speed;
+      const x = ((p.x + drift) % 1) * width;
+      const y = ((p.y + Math.sin(t * 0.18 + i) * 0.012 + drift * 0.36) % 1) * height;
+      return { ...p, x, y };
+    });
+
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i];
+      ctx.fillStyle = palette[a.hue];
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      for (let j = i + 1; j < Math.min(i + 4, pts.length); j++) {
+        const b = pts[j];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const d2 = dx * dx + dy * dy;
+        const max = width < 760 ? 7800 : 14000;
+        if (d2 < max) {
+          ctx.strokeStyle = `rgba(81,240,229,${0.08 * (1 - d2 / max)})`;
+          ctx.lineWidth = 0.7;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+    if (!prefersReducedMotion) requestAnimationFrame(draw);
+  }
+
+  resizeAmbient();
+  draw(performance.now());
 }
 
 function showWebGLFallback(err) {
@@ -370,8 +473,11 @@ function loop(now) {
 }
 
 // ---- Boot ------------------------------------------------------------------
+startAmbientField();
+
 if (webglReady) {
   rebuildTopology();
+  applyStageComposition();
   inspector.update(state);
   updateMathTable(state.dimension);
   buildGrowthTable();

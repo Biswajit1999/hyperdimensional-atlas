@@ -13,11 +13,11 @@
 
 /**
  * Generate all 2^n vertices of the centred n-cube.
- * @param {number} n dimension (0..8 supported by the app)
+ * @param {number} n dimension (0..8 fully enumerated by the app)
  * @returns {Float64Array[]} vertices, each a Float64Array of length max(n,1)
  */
 export function generateVertices(n) {
-  const count = 1 << n;            // 2^n  (n = 0 -> 1 vertex)
+  const count = Math.pow(2, n);    // 2^n  (n = 0 -> 1 vertex)
   const dim = Math.max(n, 1);      // store >=1 coordinate so 0D is a point at origin
   const vertices = new Array(count);
   for (let v = 0; v < count; v++) {
@@ -37,7 +37,7 @@ export function generateVertices(n) {
  * @returns {Array<[number, number]>}
  */
 export function generateEdges(n) {
-  const count = 1 << n;
+  const count = Math.pow(2, n);
   const edges = [];
   for (let v = 0; v < count; v++) {
     for (let b = 0; b < n; b++) {
@@ -81,10 +81,39 @@ export function sliceCube(n, axis, c) {
 
 /** Number of vertices = 2^n. */
 export function vertexCount(n) {
-  return 1 << n;
+  return Math.pow(2, n);
 }
 
 /** Number of edges = n * 2^(n-1); 0 for n = 0. */
 export function edgeCount(n) {
-  return n === 0 ? 0 : n * (1 << (n - 1));
+  return n === 0 ? 0 : n * Math.pow(2, n - 1);
+}
+
+/**
+ * Deterministic sampled skeleton for high-dimensional cubes. It is not the full
+ * edge graph; it embeds an 8-axis subcube inside n-space and gives the remaining
+ * axes stable sign patterns so projection/colour still respond to dimension.
+ *
+ * @param {number} n requested dimension
+ * @param {number} axes number of sampled axes to enumerate
+ * @returns {{vertices: Float64Array[], edges: Array<[number, number]>, sampleAxes: number}}
+ */
+export function generatePreviewSkeleton(n, axes = 8) {
+  const sampleAxes = Math.max(1, Math.min(axes, n));
+  const count = Math.pow(2, sampleAxes);
+  const vertices = new Array(count);
+
+  for (let v = 0; v < count; v++) {
+    const p = new Float64Array(Math.max(n, 1));
+    for (let b = 0; b < sampleAxes; b++) {
+      p[b] = (v & (1 << b)) ? 1 : -1;
+    }
+    for (let b = sampleAxes; b < n; b++) {
+      const bit = ((v * 1103515245 + (b + 1) * 12345) >>> 0) & 1;
+      p[b] = bit ? 0.72 : -0.72;
+    }
+    vertices[v] = p;
+  }
+
+  return { vertices, edges: generateEdges(sampleAxes), sampleAxes };
 }

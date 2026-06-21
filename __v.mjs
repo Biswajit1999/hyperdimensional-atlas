@@ -1,12 +1,12 @@
-import { getStats, faceCount, binomial } from './js/math/statistics.js';
-import { generateVertices, generateEdges, sliceCube } from './js/math/hypercube.js';
+import { getStats, faceCountExact, binomial } from './js/math/statistics.js';
+import { generateVertices, generateEdges, generatePreviewSkeleton, sliceCube } from './js/math/hypercube.js';
 import { rotationPresets, planeRate } from './js/math/rotation.js';
 import { project, hiddenDepth, perspectiveWarning } from './js/math/projection.js';
 import { rotateInPlane } from './js/math/rotation.js';
 import { readFileSync } from 'node:fs';
-import { ALL_DIMENSIONS } from './js/data.js';
-import { DIMENSION_BLURB, LADDER_CAPTION, PROJECTION_EXPLAIN, NARRATIVE_SECTIONS } from './js/content.js';
-import { DEFAULTS } from './js/constants.js';
+import { ALL_DIMENSIONS, LADDER_DIMENSIONS } from './js/data.js';
+import { DIMENSION_BLURB, LADDER_CAPTION, PROJECTION_EXPLAIN, NARRATIVE_SECTIONS, dimensionBlurb, ladderCaption } from './js/content.js';
+import { DEFAULTS, DIM_MAX, FULL_RENDER_DIM_MAX, HIGH_DIM_PREVIEW_AXES } from './js/constants.js';
 
 let pass = true;
 const exp = {4:[16,32,24,8],5:[32,80,80,40],6:[64,192,240,160],7:[128,448,672,560],8:[256,1024,1792,1792]};
@@ -38,13 +38,31 @@ for (const [n,mode] of [[4,'perspective'],[5,'sequential'],[8,'perspective'],[8,
 console.log('\n== slice / data / content sanity ==');
 const sl = sliceCube(4,3,0.5);
 console.log(`slice4D@x4: subDim=${sl.subDim} V=${sl.vertices.length} E=${sl.edges.length} ${sl.subDim===3&&sl.vertices.length===8&&sl.edges.length===12?'ok':'FAIL'}`);
-console.log(`data dims=${ALL_DIMENSIONS.length} (expect 9) ${ALL_DIMENSIONS.length===9?'ok':'FAIL'}`);
+console.log(`data dims=${ALL_DIMENSIONS.length} (expect 51) ${ALL_DIMENSIONS.length===51?'ok':'FAIL'}`);
+console.log(`ladder milestones=${LADDER_DIMENSIONS.map(d=>d.n).join(',')}`);
 console.log(`blurbs=${DIMENSION_BLURB.length} captions=${LADDER_CAPTION.length} narrative=${NARRATIVE_SECTIONS.length}`);
 console.log(`projExplain keys=${Object.keys(PROJECTION_EXPLAIN).join(',')}`);
 console.log(`schlafli 4D=${ALL_DIMENSIONS[4].schlafli}`);
-console.log(`presets defined for 0..8: ${[0,1,2,3,4,5,6,7,8].every(n=>rotationPresets(n).length>=1)?'ok':'FAIL'}`);
+console.log(`schlafli 50D=${ALL_DIMENSIONS[50].schlafli}`);
+console.log(`presets defined for 0..50: ${[0,1,2,3,4,5,6,7,8,20,50].every(n=>rotationPresets(n).length>=1)?'ok':'FAIL'}`);
 console.log(`DEFAULTS dim=${DEFAULTS.dimension} proj=${DEFAULTS.projection}`);
-if(ALL_DIMENSIONS.length!==9||DIMENSION_BLURB.length!==9||LADDER_CAPTION.length!==9||NARRATIVE_SECTIONS.length!==5) pass=false;
+if(ALL_DIMENSIONS.length!==51||DIMENSION_BLURB.length!==9||LADDER_CAPTION.length!==9||NARRATIVE_SECTIONS.length!==5||DIM_MAX!==50||FULL_RENDER_DIM_MAX!==8) pass=false;
+
+console.log('\n== high-dimension preview guard ==');
+for (const n of [20,50]) {
+  const preview = generatePreviewSkeleton(n, HIGH_DIM_PREVIEW_AXES);
+  const expectedV = 2 ** HIGH_DIM_PREVIEW_AXES;
+  const expectedE = HIGH_DIM_PREVIEW_AXES * 2 ** (HIGH_DIM_PREVIEW_AXES - 1);
+  const okPreview = preview.vertices.length === expectedV && preview.edges.length === expectedE && preview.vertices[0].length === n;
+  if (!okPreview) pass = false;
+  console.log(`preview ${n}D: drawnV=${preview.vertices.length} drawnE=${preview.edges.length} fullV=${getStats(n).vertices.toLocaleString()} ${okPreview?'ok':'FAIL'}`);
+}
+const exact50Edges = faceCountExact(50, 1) === 28147497671065600n;
+if (!exact50Edges) pass = false;
+console.log(`exact 50D edge count: ${exact50Edges ? 'ok' : 'FAIL'}`);
+const highCopyOk = dimensionBlurb(20).includes('sample') && ladderCaption(20).includes('preview');
+if (!highCopyOk) pass = false;
+console.log(`high blurb: ${highCopyOk ? 'ok' : 'FAIL'}`);
 
 console.log('\n== frontend guards ==');
 const html = readFileSync('index.html', 'utf8');

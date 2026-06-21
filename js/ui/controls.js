@@ -3,10 +3,10 @@
 // shortcuts. The panel mutates a shared `state` object and notifies the app via
 // callbacks; the app owns the consequences (rebuild geometry, update inspector).
 
-import { DIM_MIN, DIM_MAX } from '../constants.js';
+import { DIM_MIN, DIM_MAX, FULL_RENDER_DIM_MAX } from '../constants.js';
 import { rotationPresets } from '../math/rotation.js';
-import { ALL_DIMENSIONS } from '../data.js';
-import { LADDER_CAPTION } from '../content.js';
+import { LADDER_DIMENSIONS } from '../data.js';
+import { ladderCaption } from '../content.js';
 
 export class Controls {
   /**
@@ -35,6 +35,7 @@ export class Controls {
       <div class="control-group">
         <label class="control-label" for="c-dim">Dimension <output id="c-dim-out" class="mono">4D</output></label>
         <input type="range" id="c-dim" min="${DIM_MIN}" max="${DIM_MAX}" step="1" value="4">
+        <p id="c-dim-note" class="control-note">Full geometry renderer through 8D.</p>
       </div>
 
       <div class="control-group">
@@ -80,6 +81,7 @@ export class Controls {
     const $ = (id) => this.refs.panel.querySelector(id);
     this.el = {
       dim: $('#c-dim'), dimOut: $('#c-dim-out'),
+      dimNote: $('#c-dim-note'),
       projBtns: [...this.refs.panel.querySelectorAll('[data-proj]')],
       focal: $('#c-focal'), focalOut: $('#c-focal-out'),
       auto: $('#c-auto'),
@@ -144,7 +146,7 @@ export class Controls {
   }
 
   _buildLadder() {
-    const html = ALL_DIMENSIONS.map((d) => `
+    const html = LADDER_DIMENSIONS.map((d) => `
       <button class="ladder-step" data-dim="${d.n}" aria-label="${d.n}D ${d.name}">
         <span class="ladder-icon">${ladderIcon(d.n)}</span>
         <span class="ladder-num mono">${d.n}D</span>
@@ -160,6 +162,7 @@ export class Controls {
   /** Rebuild the rotation-plane dropdown and slice-axis dropdown for current n. */
   refreshPresets() {
     const n = this.state.dimension;
+    const highPreview = n > FULL_RENDER_DIM_MAX;
     const presets = rotationPresets(n);
     if (this.state.presetIndex >= presets.length) this.state.presetIndex = 0;
     this.el.plane.innerHTML = presets
@@ -174,7 +177,13 @@ export class Controls {
     this.el.axis.innerHTML = Array.from({ length: axisCount }, (_, i) =>
       `<option value="${i}">${coordName(i)}</option>`).join('');
     this.el.axis.value = String(this.state.slice.axis);
-    this.el.axis.disabled = n < 1;
+    this.el.axis.disabled = n < 1 || highPreview;
+    this.el.slice.disabled = highPreview;
+    this.el.pos.disabled = highPreview;
+    if (highPreview) {
+      this.state.slice.enabled = false;
+      this.el.slice.checked = false;
+    }
   }
 
   setDimension(n) {
@@ -183,6 +192,9 @@ export class Controls {
     this.state.dimension = n;
     this.el.dim.value = String(n);
     this.el.dimOut.textContent = `${n}D`;
+    this.el.dimNote.textContent = n > FULL_RENDER_DIM_MAX
+      ? 'Analytical sampled preview; exact counts remain live.'
+      : 'Full geometry renderer through 8D.';
     this.refreshPresets();
     this._syncLadder();
     this._syncCaption();
@@ -194,6 +206,9 @@ export class Controls {
     const s = this.state;
     this.el.dim.value = String(s.dimension);
     this.el.dimOut.textContent = `${s.dimension}D`;
+    this.el.dimNote.textContent = s.dimension > FULL_RENDER_DIM_MAX
+      ? 'Analytical sampled preview; exact counts remain live.'
+      : 'Full geometry renderer through 8D.';
     this.el.focal.value = String(s.focalLength);
     this.el.focalOut.textContent = s.focalLength.toFixed(1);
     this.el.auto.checked = s.autoRotate;
@@ -227,15 +242,15 @@ export class Controls {
   }
 
   _syncCaption() {
-    if (this.refs.captionEl) this.refs.captionEl.textContent = LADDER_CAPTION[this.state.dimension];
+    if (this.refs.captionEl) this.refs.captionEl.textContent = ladderCaption(this.state.dimension);
   }
 
   /** Update the performance readout. */
   setPerf(fps, vertices, edges) {
     if (!this.refs.perf) return;
     this.refs.perf.fps.textContent = fps.toFixed(0);
-    this.refs.perf.verts.textContent = vertices.toLocaleString();
-    this.refs.perf.edges.textContent = edges.toLocaleString();
+    this.refs.perf.verts.textContent = compactCount(vertices);
+    this.refs.perf.edges.textContent = compactCount(edges);
     this.refs.perf.dim.textContent = `${this.state.dimension}D`;
   }
 
@@ -269,6 +284,14 @@ export class Controls {
       }
     });
   }
+}
+
+function compactCount(value) {
+  if (value < 1_000_000) return value.toLocaleString();
+  if (value < 1_000_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (value < 1_000_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B`;
+  if (value < 1_000_000_000_000_000) return `${(value / 1_000_000_000_000).toFixed(1)}T`;
+  return value.toExponential(2).replace('e+', 'e');
 }
 
 function coordName(i) {

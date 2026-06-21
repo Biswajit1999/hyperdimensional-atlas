@@ -104,7 +104,11 @@ appear to converge. The inner and outer cubes of a tesseract are the **same size
 object. This is the central caution of the atlas: a projection is a faithful but
 lossy representation, and reading it requires knowing what was discarded.
 
-## 9. Dimensional growth, 0D → 8D
+## 9. Dimensional growth, 0D → 50D milestones
+
+The browser renders the full graph through 8D. Above that, the interface uses a
+sampled visual skeleton and keeps the full combinatorics in the tables. The reason
+is visible in the growth itself: the edge graph grows exponentially.
 
 | Dim | Name | Vertices | Edges | Squares | Cubic cells |
 | --- | --- | --- | --- | --- | --- |
@@ -117,5 +121,12 @@ lossy representation, and reading it requires knowing what was discarded.
 | 6 | Hexeract | 64 | 192 | 240 | 160 |
 | 7 | Hepteract | 128 | 448 | 672 | 560 |
 | 8 | Octeract | 256 | 1024 | 1792 | 1792 |
+| 10 | 10-cube | 1,024 | 5,120 | 11,520 | 15,360 |
+| 12 | 12-cube | 4,096 | 24,576 | 67,584 | 112,640 |
+| 16 | 16-cube | 65,536 | 524,288 | 1,966,080 | 4,587,520 |
+| 20 | 20-cube | 1,048,576 | 10,485,760 | 49,807,360 | 149,422,080 |
+| 30 | 30-cube | 1,073,741,824 | 16,106,127,360 | 116,769,423,360 | 544,923,975,680 |
+| 40 | 40-cube | 1,099,511,627,776 | 21,990,232,555,520 | 214,404,767,416,320 | 1,357,896,860,303,360 |
+| 50 | 50-cube | 1,125,899,906,842,624 | 28,147,497,671,065,600 | 344,806,846,470,553,600 | 2,758,454,771,764,428,800 |
 
 All values follow from `f_k(n) = C(n, k) · 2^(n-k)`.

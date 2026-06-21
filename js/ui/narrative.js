@@ -129,7 +129,7 @@ class MiniDiagram {
       return out;
     });
 
-    const scale = Math.min(w, h) * 0.30;
+    const scale = Math.min(w, h) * 0.23;
     const cx = w / 2;
     const cy = h / 2;
     const toScreen = (p) => [cx + p[0] * scale, cy - p[1] * scale];

@@ -25,6 +25,11 @@ export const DIMENSION_BLURB = [
   'An octeract: 256 vertices and 1024 edges projected from eight dimensions into three. This is near the practical limit of legibility for a direct edge projection.',
 ];
 
+export function dimensionBlurb(n) {
+  if (DIMENSION_BLURB[n]) return DIMENSION_BLURB[n];
+  return `A ${n}D hypercube is too large to enumerate interactively: it has ${Math.pow(2, n).toLocaleString()} vertices before edges are even drawn. The scene shows a deterministic 8-axis projection sample, while the formulas and counts remain for the full ${n}-cube.`;
+}
+
 // Short caption shown under the dimensional ladder for the active dimension.
 export const LADDER_CAPTION = [
   'A point has zero dimensions: pure position, nothing to project.',
@@ -37,6 +42,11 @@ export const LADDER_CAPTION = [
   'A hepteract: four hidden axes collapsed into the visible three.',
   'An octeract: the projected shadow of an eight-dimensional cube.',
 ];
+
+export function ladderCaption(n) {
+  if (LADDER_CAPTION[n]) return LADDER_CAPTION[n];
+  return `${n}D preview: sampled geometry on screen, exact combinatorics in the inspector and mathematics table.`;
+}
 
 // Projection-mode explanations (for the inspector).
 export const PROJECTION_EXPLAIN = {
