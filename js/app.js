@@ -13,7 +13,7 @@ import { rotateInPlane, rotationPresets, planeRate } from './math/rotation.js';
 import { project, hiddenDepth } from './math/projection.js';
 import { getStats, faceCount } from './math/statistics.js';
 import { ALL_DIMENSIONS, dimensionData } from './data.js';
-import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260620d';
+import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260621a';
 import { createMaterials } from './scene/materials.js';
 import { HypercubeObject } from './scene/geometry.js';
 import { depthColor } from './scene/materials.js';
@@ -235,21 +235,24 @@ function showWebGLFallback(err) {
   const diagnostic = document.getElementById('webgl-diagnostic');
   if (diagnostic) {
     diagnostic.textContent = [
-      `Renderer error: ${err?.message || 'unknown failure'}`,
-      'Collecting WebGL details...',
+      'Canvas projection mode active.',
+      `WebGL note: ${err?.message || 'renderer did not start'}`,
+      'Collecting graphics details...',
     ].join('\n');
     try {
       const lines = [
-        `Renderer error: ${err?.message || 'unknown failure'}`,
+        'Canvas projection mode active.',
+        `WebGL note: ${err?.message || 'renderer did not start'}`,
         ...webGLDiagnostics(),
-        'Fix: enable browser hardware acceleration / WebGL, then reload.',
+        'For the full 3D view, enable hardware acceleration / WebGL and reload.',
       ];
       diagnostic.textContent = lines.join('\n');
     } catch (diagnosticErr) {
       diagnostic.textContent = [
-        `Renderer error: ${err?.message || 'unknown failure'}`,
-        `Diagnostic probe failed: ${diagnosticErr?.message || 'unknown failure'}`,
-        'Fix: enable browser hardware acceleration / WebGL, then reload.',
+        'Canvas projection mode active.',
+        `WebGL note: ${err?.message || 'renderer did not start'}`,
+        `Graphics probe note: ${diagnosticErr?.message || 'details unavailable'}`,
+        'For the full 3D view, enable hardware acceleration / WebGL and reload.',
       ].join('\n');
     }
   }

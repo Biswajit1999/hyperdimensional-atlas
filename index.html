@@ -7,7 +7,7 @@
   <meta name="color-scheme" content="dark" />
   <title>Hyperdimensional Atlas — geometry beyond perception</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="styles.css?v=20260620d" />
+  <link rel="stylesheet" href="styles.css?v=20260621a" />
 
   <!-- Pinned Three.js via import map. Single consistent version, no bundler. -->
   <script type="importmap">
@@ -23,8 +23,8 @@
   <!-- Top navigation -->
   <header class="topnav">
     <div class="brand">
-      <span class="brand-title">HYPERDIMENSIONAL ATLAS</span>
-      <span class="brand-sub">A visual laboratory for geometry beyond perception</span>
+      <span class="brand-title">Hyperdimensional Atlas</span>
+      <span class="brand-sub">Interactive geometry beyond perception</span>
     </div>
     <nav class="nav-links">
       <button class="nav-btn" data-scroll="stage">Explore</button>
@@ -40,6 +40,21 @@
   <!-- Interactive stage -->
   <main id="stage" class="stage">
     <canvas id="scene" aria-label="Interactive hypercube projection"></canvas>
+
+    <section class="stage-intro" aria-labelledby="stage-heading">
+      <span class="stage-kicker mono">Interactive n-cube atlas</span>
+      <h1 id="stage-heading">Geometry beyond perception</h1>
+      <p>Rotate, slice, and project exact hypercubes from 0D to 8D. The model is live; the mathematics below stays tied to the object on screen.</p>
+      <div class="stage-actions">
+        <button class="stage-action primary" data-scroll="from-point-to-hypercube">Begin with construction</button>
+        <button class="stage-action ghost" data-scroll="mathematics">Read formulas</button>
+      </div>
+      <dl class="stage-metrics" aria-label="Atlas summary">
+        <div><dt>Range</dt><dd>0D-8D</dd></div>
+        <div><dt>Default</dt><dd>4D</dd></div>
+        <div><dt>Edges</dt><dd>1024 max</dd></div>
+      </dl>
+    </section>
 
     <!-- Lightweight renderer used when WebGL is unavailable. -->
     <div id="webgl-fallback" class="fallback" hidden>
@@ -64,12 +79,12 @@
       <canvas id="fallback-canvas" class="fallback-canvas" aria-label="2D tesseract projection mode"></canvas>
       <div class="fallback-grid">
         <section class="fallback-copy">
-          <span class="fallback-kicker mono">2D projection renderer</span>
-          <h1>Hyperdimensional Atlas</h1>
-          <p>The browser is using the lightweight Canvas renderer for this session. You can still inspect the tesseract as a projection, then continue into the mathematical notes below.</p>
+          <span class="fallback-kicker mono">Canvas projection renderer</span>
+          <h1>Hypercube Atlas</h1>
+          <p>A lightweight projection is running for this session. The tesseract remains visible as a live 2D construction, with the same mathematical notes continuing below.</p>
           <div class="fallback-actions">
-            <button class="btn fallback-primary" data-scroll="mathematics">Read mathematics</button>
-            <button class="btn fallback-secondary" data-scroll="physics">Physics notes</button>
+            <button class="btn fallback-primary" data-scroll="from-point-to-hypercube">Start the atlas</button>
+            <button class="btn fallback-secondary" data-scroll="mathematics">Read formulas</button>
           </div>
         </section>
         <aside class="fallback-inspector" aria-label="2D renderer summary">
@@ -82,8 +97,8 @@
             <div><dt>View</dt><dd>2D</dd></div>
           </dl>
           <details class="fallback-details">
-            <summary>3D renderer status</summary>
-            <pre id="webgl-diagnostic" class="fallback-diagnostic mono" aria-live="polite">2D renderer active. WebGL details are loading.</pre>
+            <summary>Graphics details</summary>
+            <pre id="webgl-diagnostic" class="fallback-diagnostic mono" aria-live="polite">Canvas projection mode active. Graphics details are loading.</pre>
           </details>
         </aside>
       </div>
@@ -278,6 +293,6 @@
     <p class="footer-base mono">© 2026 Biswajit Jana · MIT-licensed source · projections, not photographs · no analytics</p>
   </footer>
 
-  <script type="module" src="js/app.js?v=20260620d"></script>
+  <script type="module" src="js/app.js?v=20260621a"></script>
 </body>
 </html>

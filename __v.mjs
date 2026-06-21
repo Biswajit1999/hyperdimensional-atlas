@@ -3,6 +3,7 @@ import { generateVertices, generateEdges, sliceCube } from './js/math/hypercube.
 import { rotationPresets, planeRate } from './js/math/rotation.js';
 import { project, hiddenDepth, perspectiveWarning } from './js/math/projection.js';
 import { rotateInPlane } from './js/math/rotation.js';
+import { readFileSync } from 'node:fs';
 import { ALL_DIMENSIONS } from './js/data.js';
 import { DIMENSION_BLURB, LADDER_CAPTION, PROJECTION_EXPLAIN, NARRATIVE_SECTIONS } from './js/content.js';
 import { DEFAULTS } from './js/constants.js';
@@ -44,4 +45,18 @@ console.log(`schlafli 4D=${ALL_DIMENSIONS[4].schlafli}`);
 console.log(`presets defined for 0..8: ${[0,1,2,3,4,5,6,7,8].every(n=>rotationPresets(n).length>=1)?'ok':'FAIL'}`);
 console.log(`DEFAULTS dim=${DEFAULTS.dimension} proj=${DEFAULTS.projection}`);
 if(ALL_DIMENSIONS.length!==9||DIMENSION_BLURB.length!==9||LADDER_CAPTION.length!==9||NARRATIVE_SECTIONS.length!==5) pass=false;
+
+console.log('\n== frontend guards ==');
+const html = readFileSync('index.html', 'utf8');
+const css = readFileSync('styles.css', 'utf8');
+const app = readFileSync('js/app.js', 'utf8');
+const styleVersion = html.match(/styles\.css\?v=([^"]+)/)?.[1] || '';
+const appVersion = html.match(/js\/app\.js\?v=([^"]+)/)?.[1] || '';
+const rendererVersion = app.match(/renderer\.js\?v=([^']+)/)?.[1] || '';
+const hidesFallback = css.includes('.fallback[hidden]') && css.includes('display: none !important');
+const versionsAligned = !!styleVersion && styleVersion === appVersion && appVersion === rendererVersion;
+if (!hidesFallback || !versionsAligned) pass = false;
+console.log(`fallback hidden guard: ${hidesFallback ? 'ok' : 'FAIL'}`);
+console.log(`cache versions aligned: ${versionsAligned ? styleVersion : 'FAIL'}`);
+
 console.log(pass?'\n==== ALL CHECKS PASS ====':'\n==== CHECKS FAILED ====');
