@@ -13,7 +13,7 @@ import { rotateInPlane, rotationPresets, planeRate } from './math/rotation.js';
 import { project, hiddenDepth } from './math/projection.js';
 import { getStats, faceCountExact, formatCount } from './math/statistics.js';
 import { LADDER_DIMENSIONS, dimensionData } from './data.js';
-import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260621c';
+import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260621d';
 import { createMaterials } from './scene/materials.js';
 import { HypercubeObject } from './scene/geometry.js';
 import { depthColor } from './scene/materials.js';
@@ -185,7 +185,7 @@ function togglePanels() {
 
 function applyStageComposition() {
   if (!hypercube) return;
-  const wide = window.innerWidth >= 1180;
+  const wide = window.innerWidth >= 1380;
   const mobile = window.innerWidth < 760;
   const highPreview = state.dimension > FULL_RENDER_DIM_MAX;
   const x = wide ? (highPreview ? 2.45 : 2.05) : 0;

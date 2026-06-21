@@ -863,7 +863,7 @@ input[type="range"]::-moz-range-thumb {
 .panels-hidden .ladder-wrap, .panels-hidden .perf { opacity: 0; pointer-events: none; }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 1180px) {
+@media (max-width: 1380px) {
   .stage-intro { display: none; }
   .ladder-wrap {
     width: min(620px, calc(100% - 690px));
