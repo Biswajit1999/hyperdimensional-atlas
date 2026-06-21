@@ -63,7 +63,21 @@ boundary measure B_(n-1) = 2n · s^(n-1)
 
 The boundary consists of `2n` cells, each an (n−1)-cube of measure `s^(n-1)`.
 
-## 6. Plane rotations
+## 6. Axis-aligned cross-sections
+
+The interactive slice fixes one coordinate, for example `x_j = c` with `-1 <= c <= 1`.
+For the solid cube `[-1, +1]^n`, this axis-aligned intersection is another cube:
+
+```
+[-1, +1]^n intersect {x_j = c} = [-1, +1]^(n-1)
+```
+
+embedded back in the original space with the fixed coordinate held at `c`. Sliding
+the control moves the cut through parallel layers. More general angled slices can
+change shape, but the atlas keeps the control axis-aligned so the result is legible
+and exactly an `(n-1)`-cube.
+
+## 7. Plane rotations
 
 In `n` dimensions a rotation acts in a coordinate **plane**, not around an axis. For
 the plane spanned by axes `(i, j)`:
@@ -77,7 +91,7 @@ with all other coordinates unchanged. There are `n(n-1)/2` independent rotation
 planes (6 in 4D, 10 in 5D). Combining two planes produces the double rotation that
 makes a tesseract appear to turn inside out.
 
-## 7. Projection to 3D
+## 8. Projection to 3D
 
 To render an n-cube we collapse hidden coordinates one at a time. For a hidden
 coordinate `q` and focal length `f`:
@@ -95,7 +109,7 @@ Near `q = f` the scale factor diverges. The implementation guards against this b
 rotated unit vertex can have a coordinate as large as `sqrt(n)` — and (b) clamping
 the denominator to a small positive minimum.
 
-## 8. Why projections distort
+## 9. Why projections distort
 
 A projection trades one dimension for an effect in the others. Perspective makes the
 cell that is "nearer" along a hidden axis appear larger, exactly as railway tracks
@@ -104,7 +118,7 @@ appear to converge. The inner and outer cubes of a tesseract are the **same size
 object. This is the central caution of the atlas: a projection is a faithful but
 lossy representation, and reading it requires knowing what was discarded.
 
-## 9. Dimensional growth, 0D → 50D milestones
+## 10. Dimensional growth, 0D → 50D milestones
 
 The browser renders the full graph through 8D. Above that, the interface uses a
 sampled visual skeleton and keeps the full combinatorics in the tables. The reason

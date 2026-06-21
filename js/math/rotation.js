@@ -28,34 +28,34 @@ export function rotationPresets(n) {
   if (n < 2) return [{ name: 'None (too few dimensions)', planes: [] }];
 
   if (n === 2) {
-    return [{ name: 'x–y', planes: [[0, 1]] }];
+    return [{ name: 'x axis / y axis', planes: [[0, 1]] }];
   }
 
   if (n === 3) {
     return [
-      { name: 'x–y', planes: [[0, 1]] },
-      { name: 'x–z', planes: [[0, 2]] },
-      { name: 'y–z', planes: [[1, 2]] },
-      { name: 'tumble (x–y + y–z)', planes: [[0, 1], [1, 2]] },
+      { name: 'x axis / y axis', planes: [[0, 1]] },
+      { name: 'x axis / z axis', planes: [[0, 2]] },
+      { name: 'y axis / z axis', planes: [[1, 2]] },
+      { name: 'tumble (x-y + y-z)', planes: [[0, 1], [1, 2]] },
     ];
   }
 
   if (n === 4) {
     return [
-      { name: 'x–w', planes: [[0, 3]] },
-      { name: 'y–w', planes: [[1, 3]] },
-      { name: 'z–w', planes: [[2, 3]] },
-      { name: 'x–y + z–w', planes: [[0, 1], [2, 3]] },
-      { name: 'x–z + y–w', planes: [[0, 2], [1, 3]] },
-      { name: 'double (x–w + y–z)', planes: [[0, 3], [1, 2]] },
+      { name: 'x axis / 4th axis (w)', planes: [[0, 3]] },
+      { name: 'y axis / 4th axis (w)', planes: [[1, 3]] },
+      { name: 'z axis / 4th axis (w)', planes: [[2, 3]] },
+      { name: 'x-y + z-w planes', planes: [[0, 1], [2, 3]] },
+      { name: 'x-z + y-w planes', planes: [[0, 2], [1, 3]] },
+      { name: 'double (x-w + y-z)', planes: [[0, 3], [1, 2]] },
     ];
   }
 
   // n >= 5: generate sensible presets that always involve the hidden axes.
   const last = n - 1;
-  const axisName = (k) => (k < 3 ? ['x', 'y', 'z'][k] : `q${k + 1}`);
+  const axisName = (k) => (k < 3 ? `${['x', 'y', 'z'][k]} axis` : `axis ${k + 1}`);
   const label = (planes) =>
-    planes.map(([i, j]) => `${axisName(i)}–${axisName(j)}`).join(' + ');
+    planes.map(([i, j]) => `${axisName(i)} / ${axisName(j)}`).join(' + ');
 
   const presets = [];
   presets.push({ name: label([[0, last]]), planes: [[0, last]] });

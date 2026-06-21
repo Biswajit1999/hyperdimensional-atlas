@@ -13,7 +13,7 @@ import { rotateInPlane, rotationPresets, planeRate } from './math/rotation.js';
 import { project, hiddenDepth } from './math/projection.js';
 import { getStats, faceCountExact, formatCount } from './math/statistics.js';
 import { LADDER_DIMENSIONS, dimensionData } from './data.js';
-import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260621b';
+import { SceneManager, webGLDiagnostics } from './scene/renderer.js?v=20260621c';
 import { createMaterials } from './scene/materials.js';
 import { HypercubeObject } from './scene/geometry.js';
 import { depthColor } from './scene/materials.js';
@@ -162,6 +162,7 @@ function computeFrame() {
 function handleChange(reason) {
   if (reason === 'dimension' || reason === 'slice') {
     rebuildTopology();
+    applyStageComposition();
     inspector.update(state);
     updateMathTable(state.dimension);
   } else if (reason === 'rotation') {
@@ -185,8 +186,25 @@ function togglePanels() {
 function applyStageComposition() {
   if (!hypercube) return;
   const wide = window.innerWidth >= 1180;
-  hypercube.object3d.position.set(wide ? 1.35 : 0, wide ? -0.04 : 0, 0);
-  hypercube.object3d.scale.setScalar(wide ? 0.96 : 0.9);
+  const mobile = window.innerWidth < 760;
+  const highPreview = state.dimension > FULL_RENDER_DIM_MAX;
+  const x = wide ? (highPreview ? 2.45 : 2.05) : 0;
+  const y = wide ? (highPreview ? -0.08 : -0.04) : (mobile ? -0.1 : -0.04);
+  const scale = wide
+    ? (highPreview ? 0.45 : 0.74)
+    : mobile
+      ? (highPreview ? 0.42 : 0.48)
+      : (highPreview ? 0.42 : 0.5);
+
+  hypercube.object3d.position.set(x, y, 0);
+  hypercube.object3d.scale.setScalar(scale);
+
+  if (scene) scene.setBloomStrength(prefersReducedMotion ? 0.42 : highPreview ? 0.34 : 0.78);
+  if (materials) {
+    materials.edgeMaterial.opacity = highPreview ? 0.44 : 0.92;
+    materials.vertexMaterial.opacity = highPreview ? 0.62 : 0.95;
+    materials.vertexMaterial.size = highPreview ? 0.095 : 0.13;
+  }
 }
 
 window.addEventListener('resize', applyStageComposition);

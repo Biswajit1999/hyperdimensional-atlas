@@ -34,19 +34,19 @@ export class Controls {
 
       <div class="control-group">
         <label class="control-label" for="c-dim">Dimension <output id="c-dim-out" class="mono">4D</output></label>
-        <input type="range" id="c-dim" min="${DIM_MIN}" max="${DIM_MAX}" step="1" value="4">
+        <input type="range" id="c-dim" min="${DIM_MIN}" max="${DIM_MAX}" step="1" value="4" title="0D-8D renders the full cube graph. 9D-50D uses a sampled preview with exact formulas.">
         <p id="c-dim-note" class="control-note">Full geometry renderer through 8D.</p>
       </div>
 
       <div class="control-group">
         <span class="control-label">Projection</span>
         <div class="seg" role="radiogroup" aria-label="Projection mode">
-          <button class="seg-btn" data-proj="orthographic" role="radio">Ortho</button>
-          <button class="seg-btn" data-proj="perspective" role="radio">Perspective</button>
-          <button class="seg-btn" data-proj="sequential" role="radio">Sequential</button>
+          <button class="seg-btn" data-proj="orthographic" role="radio" title="Parallel projection: hidden axes are dropped without perspective scaling.">Ortho</button>
+          <button class="seg-btn" data-proj="perspective" role="radio" title="Perspective projection: hidden-axis distance changes apparent size.">Perspective</button>
+          <button class="seg-btn" data-proj="sequential" role="radio" title="Sequential projection collapses hidden axes one at a time for high-D legibility.">Sequential</button>
         </div>
         <label class="control-label sub" for="c-focal">Focal length <output id="c-focal-out" class="mono">3.2</output></label>
-        <input type="range" id="c-focal" min="1.8" max="8" step="0.1" value="3.2">
+        <input type="range" id="c-focal" min="1.8" max="8" step="0.1" value="3.2" title="Higher focal length reduces perspective exaggeration.">
       </div>
 
       <div class="control-group">
@@ -55,26 +55,26 @@ export class Controls {
         <label class="control-label sub" for="c-speed">Speed <output id="c-speed-out" class="mono">0.50</output></label>
         <input type="range" id="c-speed" min="0" max="2" step="0.05" value="0.5">
         <label class="control-label sub" for="c-plane">Rotation plane</label>
-        <select id="c-plane" class="select"></select>
-        <label class="check"><input type="checkbox" id="c-multi" checked><span>Multi-plane rotation</span></label>
+        <select id="c-plane" class="select" title="A rotation happens in the selected coordinate plane or planes."></select>
+        <label class="check" title="Rotate through every plane in the selected preset."><input type="checkbox" id="c-multi" checked><span>Multi-plane rotation</span></label>
       </div>
 
       <div class="control-group">
         <span class="control-label">View</span>
-        <label class="check"><input type="checkbox" id="c-wire" checked><span>Wireframe edges</span></label>
-        <label class="check"><input type="checkbox" id="c-verts" checked><span>Vertex markers</span></label>
-        <label class="check"><input type="checkbox" id="c-color" checked><span>Hidden-dimension colour</span></label>
-        <label class="check"><input type="checkbox" id="c-trail"><span>Ghost trails</span></label>
+        <label class="check" title="Draw the projected cube edges."><input type="checkbox" id="c-wire" checked><span>Wireframe edges</span></label>
+        <label class="check" title="Show each projected vertex as a marker."><input type="checkbox" id="c-verts" checked><span>Vertex markers</span></label>
+        <label class="check" title="Colour encodes position along collapsed hidden coordinates."><input type="checkbox" id="c-color" checked><span>Hidden-dimension colour</span></label>
+        <label class="check" title="Leave fading echoes of previous edge positions."><input type="checkbox" id="c-trail"><span>Ghost trails</span></label>
         <button class="btn" id="c-reset">Reset view</button>
       </div>
 
       <div class="control-group">
         <span class="control-label">Cross-section</span>
-        <label class="check"><input type="checkbox" id="c-slice"><span>Slice mode</span></label>
+        <label class="check" title="Fix one coordinate to intersect the cube with a flat hyperplane."><input type="checkbox" id="c-slice"><span>Slice mode</span></label>
         <label class="control-label sub" for="c-axis">Slice coordinate</label>
-        <select id="c-axis" class="select"></select>
+        <select id="c-axis" class="select" title="Choose which coordinate is fixed by the slicing plane."></select>
         <label class="control-label sub" for="c-pos">Slice position <output id="c-pos-out" class="mono">0.00</output></label>
-        <input type="range" id="c-pos" min="-1" max="1" step="0.01" value="0">
+        <input type="range" id="c-pos" min="-1" max="1" step="0.01" value="0" title="Move the axis-aligned slice through parallel layers of the solid cube.">
       </div>
     `;
 
@@ -295,7 +295,7 @@ function compactCount(value) {
 }
 
 function coordName(i) {
-  return i < 3 ? ['x', 'y', 'z'][i] : `q${i + 1}`;
+  return i < 3 ? `${['x', 'y', 'z'][i]} axis` : `axis ${i + 1}`;
 }
 
 // Minimal inline SVG glyph per dimension for the ladder.

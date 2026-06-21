@@ -114,7 +114,8 @@ export class Inspector {
       this.el.slice.textContent =
         `Fixing ${axisName} = ${state.slice.position.toFixed(2)} intersects the ` +
         `${d.name.toLowerCase()} in a ${sub}-cube — a ${subName}. ` +
-        `Sweep the slider to move the cut through the figure.`;
+        `This axis-aligned plane slides through parallel layers of the solid cube; ` +
+        `the remaining coordinates keep the same range.`;
     } else {
       this.el.sliceBlock.hidden = true;
     }
@@ -122,7 +123,7 @@ export class Inspector {
 }
 
 function coordName(i) {
-  return i < 3 ? ['x', 'y', 'z'][i] : `q${i + 1}`;
+  return i < 3 ? `${['x', 'y', 'z'][i]} axis` : `axis ${i + 1}`;
 }
 
 function setCount(el, value) {
