@@ -71,9 +71,9 @@ const exactCentralShell = binomialBigInt(50, 25) === 126410606437752n;
 if (!exact50Edges || !exactCentralShell) pass = false;
 console.log(`exact 50D edge count: ${exact50Edges ? 'ok' : 'FAIL'}`);
 console.log(`exact Q50 central Hamming shell: ${exactCentralShell ? 'ok' : 'FAIL'}`);
-const highCopyOk = dimensionBlurb(20).includes('sample') && ladderCaption(20).includes('preview');
+const highCopyOk = dimensionBlurb(20).includes('exact 8D coordinate face') && ladderCaption(20).includes('exact 8D coordinate face');
 if (!highCopyOk) pass = false;
-console.log(`high blurb: ${highCopyOk ? 'ok' : 'FAIL'}`);
+console.log(`high-dimensional copy: ${highCopyOk ? 'ok' : 'FAIL'}`);
 
 console.log('\n== frontend guards ==');
 const html = readFileSync('index.html', 'utf8');
