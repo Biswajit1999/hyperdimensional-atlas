@@ -10,6 +10,7 @@ import { FULL_RENDER_DIM_MAX, HIGH_DIM_PREVIEW_AXES } from '../constants.js';
 export class Inspector {
   constructor(root) {
     this.root = root;
+    ensureHighDimensionStyles();
     this.root.innerHTML = `
       <header class="panel-head">
         <span class="panel-eyebrow">Scientific inspector</span>
@@ -174,4 +175,23 @@ function hammingProfileMarkup(n) {
   }).join('');
 
   return `<div class="insp-shell-bars" style="--shell-columns:${counts.length}" role="img" aria-label="Exact binomial Hamming-shell profile for Q${n}; shell k contains C(${n}, k) vertices">${bars}</div><p class="insp-shell-axis"><span>k = 0</span><span>k = ${Math.floor(n / 2)}</span><span>k = ${n}</span></p>`;
+}
+
+function ensureHighDimensionStyles() {
+  if (document.getElementById('atlas-high-dimension-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'atlas-high-dimension-styles';
+  style.textContent = `
+    .insp-shell-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .insp-shell-badge { color:#86f0b8; background:rgba(134,240,184,.08); border:1px solid rgba(134,240,184,.26); border-radius:999px; padding:3px 6px; font:700 8px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; letter-spacing:.08em; white-space:nowrap; }
+    .insp-shell-profile { margin-top:10px; }
+    .insp-shell-bars { display:grid; grid-template-columns:repeat(var(--shell-columns), minmax(2px,1fr)); gap:2px; height:92px; align-items:end; padding:0 2px; border-bottom:1px solid rgba(81,240,229,.20); }
+    .insp-shell-bar { display:grid; grid-template-rows:1fr 12px; align-items:end; min-width:0; height:100%; }
+    .insp-shell-bar i { display:block; width:100%; min-height:2px; border-radius:2px 2px 0 0; background:linear-gradient(180deg,#f5bd63 0%,#b88cff 46%,#51f0e5 100%); box-shadow:0 0 9px rgba(81,240,229,.22); transform-origin:bottom; animation:atlas-shell-rise .45s cubic-bezier(.2,.8,.2,1) both; }
+    .insp-shell-bar span { color:rgba(234,242,255,.62); font:600 7px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; text-align:center; }
+    .insp-shell-axis { display:flex; justify-content:space-between; gap:8px; margin:5px 0 0; color:#738398; font:600 8px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+    @keyframes atlas-shell-rise { from { opacity:.16; transform:scaleY(.04); } to { opacity:1; transform:scaleY(1); } }
+    @media (prefers-reduced-motion: reduce) { .insp-shell-bar i { animation:none; } }
+  `;
+  document.head.append(style);
 }
