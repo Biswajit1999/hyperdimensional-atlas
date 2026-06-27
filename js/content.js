@@ -27,7 +27,7 @@ export const DIMENSION_BLURB = [
 
 export function dimensionBlurb(n) {
   if (DIMENSION_BLURB[n]) return DIMENSION_BLURB[n];
-  return `A ${n}D hypercube is too large to enumerate interactively: it has ${Math.pow(2, n).toLocaleString()} vertices before edges are even drawn. The scene shows a deterministic 8-axis projection sample, while the formulas and counts remain for the full ${n}-cube.`;
+  return `A ${n}D hypercube is too large to enumerate interactively: it has ${Math.pow(2, n).toLocaleString()} vertices before edges are even drawn. The viewport therefore shows one exact 8D coordinate face embedded in Q${n}, with the remaining coordinates fixed at −1. The formulas, Hamming-shell profile, and counts remain for the complete ${n}-cube.`;
 }
 
 // Short caption shown under the dimensional ladder for the active dimension.
@@ -45,7 +45,7 @@ export const LADDER_CAPTION = [
 
 export function ladderCaption(n) {
   if (LADDER_CAPTION[n]) return LADDER_CAPTION[n];
-  return `${n}D preview: sampled geometry on screen, exact combinatorics in the inspector and mathematics table.`;
+  return `${n}D view: one exact 8D coordinate face on screen; exact full-Q${n} combinatorics in the inspector.`;
 }
 
 // Projection-mode explanations (for the inspector).
