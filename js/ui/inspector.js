@@ -46,6 +46,15 @@ export class Inspector {
         <p id="insp-preview" class="insp-text"></p>
       </section>
 
+      <section class="insp-block" id="insp-shell-block" hidden>
+        <div class="insp-shell-head">
+          <h3>Exact Hamming shells</h3>
+          <span class="insp-shell-badge">full Qₙ</span>
+        </div>
+        <p class="insp-text">For one reference vertex, shell <span class="mono">k</span> contains exactly <span class="mono">C(n,k)</span> vertices. This profile describes the complete n-cube, not only the coordinate face in the viewport.</p>
+        <div id="insp-shell-profile" class="insp-shell-profile"></div>
+      </section>
+
       <section class="insp-block" id="insp-slice-block" hidden>
         <h3>Cross-section</h3>
         <p id="insp-slice" class="insp-text"></p>
@@ -67,6 +76,8 @@ export class Inspector {
       blurb: this.root.querySelector('#insp-blurb'),
       previewBlock: this.root.querySelector('#insp-preview-block'),
       preview: this.root.querySelector('#insp-preview'),
+      shellBlock: this.root.querySelector('#insp-shell-block'),
+      shellProfile: this.root.querySelector('#insp-shell-profile'),
       sliceBlock: this.root.querySelector('#insp-slice-block'),
       slice: this.root.querySelector('#insp-slice'),
     };
@@ -101,8 +112,12 @@ export class Inspector {
         `${fixedAxes} remaining coordinate${fixedAxes === 1 ? ' is' : 's are'} fixed at −1. ` +
         `Every displayed point is a genuine ${n}D vertex and every displayed segment is a genuine edge; ` +
         `the counts above still describe the complete ${n}-cube.`;
+      this.el.shellBlock.hidden = false;
+      this.el.shellProfile.innerHTML = hammingProfileMarkup(n);
     } else {
       this.el.previewBlock.hidden = true;
+      this.el.shellBlock.hidden = true;
+      this.el.shellProfile.replaceChildren();
     }
 
     const warn = perspectiveWarning(n, state.focalLength) && state.projection !== 'orthographic';
@@ -137,4 +152,26 @@ function setCount(el, value) {
 function compactCount(value) {
   if (value < 1_000_000_000) return value.toLocaleString();
   return value.toExponential(2).replace('e+', 'e');
+}
+
+function choose(n, k) {
+  const r = Math.min(k, n - k);
+  let value = 1n;
+  for (let i = 1; i <= r; i++) value = (value * BigInt(n - r + i)) / BigInt(i);
+  return value;
+}
+
+function hammingProfileMarkup(n) {
+  const counts = Array.from({ length: n + 1 }, (_, k) => choose(n, k));
+  const maximum = counts.reduce((best, count) => count > best ? count : best, 0n);
+  const maximumNumber = Number(maximum);
+  const labels = new Set([0, Math.floor(n / 2), n]);
+
+  const bars = counts.map((count, k) => {
+    const height = Math.max(2, (100 * Number(count)) / maximumNumber);
+    const label = labels.has(k) ? k : '';
+    return `<div class="insp-shell-bar" title="Hamming distance ${k}: ${count.toLocaleString()} vertices"><i style="height:${height.toFixed(3)}%"></i><span>${label}</span></div>`;
+  }).join('');
+
+  return `<div class="insp-shell-bars" style="--shell-columns:${counts.length}" role="img" aria-label="Exact binomial Hamming-shell profile for Q${n}; shell k contains C(${n}, k) vertices">${bars}</div><p class="insp-shell-axis"><span>k = 0</span><span>k = ${Math.floor(n / 2)}</span><span>k = ${n}</span></p>`;
 }
