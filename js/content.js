@@ -5,32 +5,22 @@
 
 // Plain-language "what you are seeing" for each dimension (0..8).
 export const DIMENSION_BLURB = [
-  // 0
   'A single point. It has no length, width, or depth — only position. Every higher cube is built by sweeping this point through space.',
-  // 1
   'A line segment: the path traced when a point moves a fixed distance along one axis. Two endpoints, one edge.',
-  // 2
   'A square: a segment swept perpendicular to itself. Four vertices, four edges, one filled face.',
-  // 3
   'A cube: a square swept along a third axis. This is the highest cube we can see directly, with no projection required.',
-  // 4
   'A tesseract shown as a 3D shadow. You cannot see a true 4-cube; this is its projection. The "cube within a cube" appears because one bounding cell is nearer in the fourth direction and the other is farther.',
-  // 5
   'A penteract projected through two hidden axes into 3D. The nesting deepens: more cells overlap, so colour and depth cues help separate near from far in the collapsed directions.',
-  // 6
   'A hexeract. Six bounding directions are folded into three. The figure is dense, but every crossing is an exact edge of the real 6-cube — nothing here is decorative.',
-  // 7
   'A hepteract. With four hidden axes collapsed, the projection is intricate. Reducing rotation to a single plane or enabling slice mode makes the structure easier to read.',
-  // 8
   'An octeract: 256 vertices and 1024 edges projected from eight dimensions into three. This is near the practical limit of legibility for a direct edge projection.',
 ];
 
 export function dimensionBlurb(n) {
   if (DIMENSION_BLURB[n]) return DIMENSION_BLURB[n];
-  return `A ${n}D hypercube is too large to enumerate interactively: it has ${Math.pow(2, n).toLocaleString()} vertices before edges are even drawn. The scene shows a deterministic 8-axis projection sample, while the formulas and counts remain for the full ${n}-cube.`;
+  return `A ${n}D hypercube is too large to enumerate interactively: it has ${Math.pow(2, n).toLocaleString()} vertices before edges are even drawn. The viewport therefore shows one exact 8D coordinate face embedded in Q${n}, with the remaining coordinates fixed at −1. The formulas, Hamming-shell profile, and counts remain for the complete ${n}-cube.`;
 }
 
-// Short caption shown under the dimensional ladder for the active dimension.
 export const LADDER_CAPTION = [
   'A point has zero dimensions: pure position, nothing to project.',
   'A line segment is the simplest one-dimensional figure.',
@@ -45,7 +35,7 @@ export const LADDER_CAPTION = [
 
 export function ladderCaption(n) {
   if (LADDER_CAPTION[n]) return LADDER_CAPTION[n];
-  return `${n}D preview: sampled geometry on screen, exact combinatorics in the inspector and mathematics table.`;
+  return `${n}D view: one exact 8D coordinate face on screen; exact full-Q${n} combinatorics in the inspector.`;
 }
 
 // Projection-mode explanations (for the inspector).
@@ -57,6 +47,31 @@ export const PROJECTION_EXPLAIN = {
   sequential:
     'Sequential projection collapses one hidden axis at a time with a focal length that grows at each stage, giving a gentler, more legible nesting for high dimensions.',
 };
+
+/**
+ * Keep static stage copy consistent with the runtime representation policy.
+ * The DOM is present before the application module is evaluated, so this also
+ * corrects text in the no-WebGL route without changing the mathematical engine.
+ */
+export function applyRepresentationPolicyCopy() {
+  if (typeof document === 'undefined') return;
+  const description = document.querySelector('meta[name="description"]');
+  if (description) {
+    description.setAttribute(
+      'content',
+      'Hyperdimensional Atlas — an interactive visual laboratory for hypercubes from 0D to 50D, with full rendering through 8D and an exact embedded coordinate-face view beyond.',
+    );
+  }
+  const stageCopy = document.querySelector('.stage-intro > p');
+  if (stageCopy) {
+    stageCopy.textContent = 'Rotate exact hypercubes through 8D, then inspect an exact embedded coordinate-face view up to 50D. The full combinatorics remain exact and visible in the inspector.';
+  }
+  const notes = [...document.querySelectorAll('.table-note')];
+  const combinatoricsNote = notes.find((note) => note.textContent.includes('Above 8D'));
+  if (combinatoricsNote) {
+    combinatoricsNote.textContent = 'Face vector for the dimension selected above — updates live. Above 8D the screen shows one exact coordinate face, while the counts remain for the full n-cube.';
+  }
+}
 
 // Long-form narrative sections rendered below the canvas.
 // Each entry: { id, kicker, title, html }. The html is trusted static content.
@@ -153,3 +168,5 @@ export const NARRATIVE_SECTIONS = [
     `,
   },
 ];
+
+applyRepresentationPolicyCopy();

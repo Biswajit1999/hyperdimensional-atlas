@@ -1,0 +1,19 @@
+name: Atlas checks
+
+on:
+  push:
+    branches: [research/hypercube-graph-atlas-v2]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  exactness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node __v.mjs

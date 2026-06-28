@@ -90,13 +90,20 @@ export function edgeCount(n) {
 }
 
 /**
- * Deterministic sampled skeleton for high-dimensional cubes. It is not the full
- * edge graph; it embeds an 8-axis subcube inside n-space and gives the remaining
- * axes stable sign patterns so projection/colour still respond to dimension.
+ * Exact level-of-detail geometry for high-dimensional cubes.
  *
- * @param {number} n requested dimension
- * @param {number} axes number of sampled axes to enumerate
- * @returns {{vertices: Float64Array[], edges: Array<[number, number]>, sampleAxes: number}}
+ * Enumerating all vertices of Q_n is intentionally bounded by the renderer.
+ * Above that boundary, this function renders an exact m-dimensional coordinate
+ * face Q_m embedded in Q_n: the first m axes vary over {-1,+1}; every remaining
+ * coordinate is fixed at -1. Therefore every displayed point is a genuine
+ * vertex of Q_n and every displayed segment is a genuine Q_n edge. It is not a
+ * stochastic cloud, and it does not imply that the displayed face is the whole
+ * n-cube. The inspector exposes this distinction alongside the exact global
+ * combinatorics and Hamming-weight profile.
+ *
+ * @param {number} n requested parent dimension
+ * @param {number} axes maximum dimension of the exact coordinate face
+ * @returns {{vertices: Float64Array[], edges: Array<[number, number]>, sampleAxes: number, fixedAxes: number, representation: string}}
  */
 export function generatePreviewSkeleton(n, axes = 8) {
   const sampleAxes = Math.max(1, Math.min(axes, n));
@@ -108,12 +115,18 @@ export function generatePreviewSkeleton(n, axes = 8) {
     for (let b = 0; b < sampleAxes; b++) {
       p[b] = (v & (1 << b)) ? 1 : -1;
     }
-    for (let b = sampleAxes; b < n; b++) {
-      const bit = ((v * 1103515245 + (b + 1) * 12345) >>> 0) & 1;
-      p[b] = bit ? 0.72 : -0.72;
-    }
+    // Fix the remaining coordinates at a true boundary value. Earlier previews
+    // used pseudo-random interior values here, which meant their displayed
+    // points were not vertices of the parent n-cube.
+    for (let b = sampleAxes; b < n; b++) p[b] = -1;
     vertices[v] = p;
   }
 
-  return { vertices, edges: generateEdges(sampleAxes), sampleAxes };
+  return {
+    vertices,
+    edges: generateEdges(sampleAxes),
+    sampleAxes,
+    fixedAxes: n - sampleAxes,
+    representation: 'exact-coordinate-face',
+  };
 }
