@@ -77,6 +77,43 @@ function norm2(p) {
   return p.reduce((sum, x) => sum + x * x, 0);
 }
 
+function distance(a, b) {
+  return Math.sqrt(a.reduce((sum, x, i) => sum + (x - b[i]) ** 2, 0));
+}
+
+function orthographicProject(p) {
+  return [p[0] ?? 0, p[1] ?? 0, p[2] ?? 0];
+}
+
+function sequentialProjection(p) {
+  const out = orthographicProject(p);
+  for (let k = 3; k < p.length; k += 1) {
+    const weight = 0.22 / (k - 1);
+    out[0] += weight * p[k];
+    out[1] -= 0.72 * weight * p[k];
+    out[2] += 0.48 * weight * p[k];
+  }
+  return out;
+}
+
+function perspectiveProject(p, focal = 7) {
+  const w = focal - 0.35 * (p[3] ?? 0) - 0.18 * (p[4] ?? 0);
+  const scale = focal / Math.max(1e-6, w);
+  return [(p[0] ?? 0) * scale, (p[1] ?? 0) * scale, (p[2] ?? 0) * scale];
+}
+
+function edgeLengths(vertices, edges, projector) {
+  const projected = vertices.map(projector);
+  return edges.map(([a, b]) => distance(projected[a], projected[b]));
+}
+
+function stats(values) {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const mean = values.reduce((sum, x) => sum + x, 0) / values.length;
+  return { min, max, mean, ratio: max / Math.max(min, 1e-12) };
+}
+
 for (let n = 0; n <= 8; n += 1) {
   const vertices = generateVertices(n);
   const edges = generateEdges(n);
@@ -108,3 +145,26 @@ for (let n = 0; n <= 8; n += 1) {
   assertNear(`hypercube side-two volume ${n}D`, side ** n, 2 ** n, 0);
   if (n > 0) assertNear(`hypercube side-two boundary ${n}D`, 2 * n * side ** (n - 1), 2 * n * 2 ** (n - 1), 0);
 }
+
+const cube3 = generateVertices(3);
+const cube3Edges = generateEdges(3);
+const cube3Lengths = edgeLengths(cube3, cube3Edges, orthographicProject);
+assertTrue('3D orthographic cube preserves all edge lengths', cube3Lengths.every((x) => Math.abs(x - 2) < 1e-12));
+
+const cube5 = generateVertices(5);
+const cube5Edges = generateEdges(5);
+const orthographicLengths5 = edgeLengths(cube5, cube5Edges, orthographicProject);
+const collapsedEdges = orthographicLengths5.filter((x) => x < 1e-12).length;
+assertNear('5D orthographic projection collapses hidden-axis edges', collapsedEdges, edgeCount(5) - edgeCount(3) * 2 ** 2, 0);
+assertTrue('5D orthographic projection needs distortion warning', collapsedEdges > 0);
+
+const sequentialLengths5 = edgeLengths(cube5, cube5Edges, sequentialProjection);
+const sequentialStats = stats(sequentialLengths5);
+assertTrue('sequential projection keeps every 5D edge visible but distorted', sequentialStats.min > 0 && sequentialStats.ratio > 1.5);
+
+const perspectiveLengths5 = edgeLengths(cube5, cube5Edges, perspectiveProject);
+const perspectiveStats = stats(perspectiveLengths5);
+assertTrue('perspective projection is finite for the documented focal distance', perspectiveLengths5.every(Number.isFinite));
+assertTrue('perspective projection distorts equal high-dimensional edges', perspectiveStats.ratio > 1.1);
+
+console.log(`Projection length ratios: orthographic hidden-collapse=${collapsedEdges}, sequential=${sequentialStats.ratio.toFixed(3)}, perspective=${perspectiveStats.ratio.toFixed(3)}`);
