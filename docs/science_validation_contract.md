@@ -35,6 +35,16 @@ This transformation must preserve squared radius and leave all other coordinates
 
 The 3D view is a projection or staged collapse of coordinates. It is not a direct view of higher-dimensional space. Perspective projection may distort lengths and angles, especially near singular focal configurations. Any projection warnings or clamps are numerical and educational safeguards, not physical effects.
 
+Projection diagnostics must compare equal original edge lengths against the displayed 3D edge-length distribution. For the side-two `n`-cube, all mathematical graph edges have original length 2. A rendered view may preserve that only for a true 3D cube under orthographic projection. For `n > 3`, projection necessarily hides, collapses, or distorts at least some directions.
+
+## Projection truth rules
+
+- Orthographic projection of a 3D cube must preserve all displayed edge lengths.
+- Orthographic projection of a 5D cube onto the first three coordinates collapses hidden-axis edges to zero length, so it must be labelled as a projection.
+- Sequential or staged hidden-coordinate projection may keep hidden-axis edges visible, but those edges are display encodings and their lengths are not physical measurements.
+- Perspective projection must remain finite for the documented focal distance and must be labelled as a distorted display transform.
+- No animation, bloom, trail, particle, or parallax effect may imply that the viewer is seeing physical extra dimensions directly.
+
 ## Validation checks
 
 `tools/validate_geometry_contract.mjs` checks:
@@ -46,6 +56,10 @@ The 3D view is a projection or staged collapse of coordinates. It is not a direc
 5. Plane rotations preserve squared radius.
 6. Zero-angle plane rotation is identity.
 7. Side-two hypervolume and boundary-measure scaling.
+8. 3D orthographic projection preserves all cube edge lengths.
+9. 5D orthographic projection collapses hidden-axis edges and therefore needs a projection warning.
+10. Sequential 5D projection keeps hidden-axis edges visible only by introducing measurable display distortion.
+11. Perspective 5D projection remains finite at the documented focal distance and distorts equal high-dimensional edges.
 
 ## Visualisation rules
 
@@ -53,7 +67,8 @@ The 3D view is a projection or staged collapse of coordinates. It is not a direc
 - Trails, glow, bloom, and starfield effects must not be described as data.
 - High-dimensional previews must be labelled as sampled skeletons when the full graph is not rendered.
 - A tesseract must not be described as spacetime or as evidence for physical extra dimensions.
+- Projection distortion warnings must appear before adding further interface polish.
 
 ## Next scientific gap
 
-Add projection-distortion validation: compare original high-dimensional edge lengths with rendered 3D edge-length distributions for orthographic, perspective, and sequential modes, then expose a distortion warning in the inspector before further visual polish.
+Bind the browser projection code to the validation fixture so the inspector can report edge-length distortion ratios for the exact active scene rather than relying only on the standalone Node contract.
