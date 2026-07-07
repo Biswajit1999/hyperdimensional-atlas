@@ -66,8 +66,8 @@ The interface separates mathematics, established physics, and speculation so the
 * **Live scientific inspector**
   Object name, Schläfli symbol, vertex count, edge count, face counts, hypervolume, and boundary measure update with dimension.
 
-* **Procedural atmosphere**
-  CSS visual effects, Three.js starfield, gentle bloom, and no stock images.
+* **Display atmosphere with guardrails**
+  CSS and Three.js rendering choices are treated as interface aids only. Stars, glow, bloom, and trails must never be described as data, evidence, or physical higher-dimensional behaviour.
 
 * **Interaction tools**
   Ghost trails, vertex markers, wireframe toggle, FPS monitor, keyboard shortcuts, reduced-motion support, and WebGL fallback handling.
@@ -97,19 +97,27 @@ x_i' = x_i cos θ − x_j sin θ
 x_j' = x_i sin θ + x_j cos θ
 ```
 
-Projection to 3D collapses each hidden coordinate `q` using a perspective factor:
-
-```text
-f / (f − q)
-```
-
-The focal length is clamped to avoid singularities.
+Projection to 3D is a display transform. It can preserve the edge lengths of a 3D cube under orthographic projection, but for dimensions above three it must collapse, hide, or distort at least some directions. The validation contract now checks this explicitly by comparing original equal graph-edge lengths with rendered 3D edge-length distributions.
 
 Full derivations are available in:
 
 ```text
 docs/mathematics.md
 ```
+
+---
+
+## Validation
+
+Run the geometry and projection contract before changing rendering or interface animation:
+
+```bash
+node tools/validate_geometry_contract.mjs
+```
+
+The contract checks exact hypercube combinatorics, Hamming-distance edge definitions, rotation radius preservation, side-two hypervolume and boundary measure, and projection-distortion cases for 3D and 5D cubes.
+
+Expected status for this branch: the command should print `PASS` lines and finish without setting a failing process exit code.
 
 ---
 
@@ -258,34 +266,3 @@ Research interests include astronomical instrumentation, exoplanets, Brown Dwarf
 
 * GitHub: https://github.com/Biswajit1999/hyperdimensional-atlas
 * Email: [biswajitj998@gmail.com](mailto:biswajitj998@gmail.com)
-
----
-
-## Citation
-
-If you use or reference this work, please cite:
-
-> Jana, B. (2026). *Hyperdimensional Atlas: an interactive visual laboratory for the geometry of hypercubes (0D–50D)* [Web application]. https://biswajit1999.github.io/hyperdimensional-atlas/
-
-```bibtex
-@misc{jana2026hyperatlas,
-  author = {Jana, Biswajit},
-  title  = {Hyperdimensional Atlas: an interactive visual laboratory
-            for the geometry of hypercubes (0D--50D)},
-  year   = {2026},
-  note   = {Web application},
-  url    = {https://biswajit1999.github.io/hyperdimensional-atlas/}
-}
-```
-
----
-
-## License
-
-Released under the MIT License. See [LICENSE](LICENSE).
-
----
-
-Built as a static site.
-
-**Projections, not photographs. No analytics. No server.**
