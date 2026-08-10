@@ -289,3 +289,7 @@ Released under the MIT License. See [LICENSE](LICENSE).
 Built as a static site.
 
 **Projections, not photographs. No analytics. No server.**
+
+## Research Quality Upgrade
+
+See [RESEARCH_QUALITY.md](RESEARCH_QUALITY.md) for the validation layer, reference anchors, equations and research boundaries added to this repository.

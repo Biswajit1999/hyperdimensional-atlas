@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node __v.mjs",
     "verify": "node __verify.mjs",
-    "preview": "npx http-server -p 8000 -c-1"
+    "preview": "npx http-server -p 8000 -c-1",
+    "validate:research": "node scripts/validate_repository.mjs"
   }
 }

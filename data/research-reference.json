@@ -1,0 +1,29 @@
+{
+  "title": "Hyperdimensional Atlas",
+  "description": "Interactive high-dimensional geometry atlas for hypercubes, projections, cross-sections and dimensional scaling laws.",
+  "equations": [
+    "Hypercube vertices = 2^n",
+    "Edges = n 2^(n-1)",
+    "Hypersphere volume V_n = pi^(n/2) R^n / Gamma(n/2+1)"
+  ],
+  "references": [
+    "Coxeter, H.S.M., 1973. Regular Polytopes. Dover Publications."
+  ],
+  "anchors": [
+    {
+      "x": 3,
+      "y": 8,
+      "label": "cube vertices"
+    },
+    {
+      "x": 4,
+      "y": 16,
+      "label": "tesseract vertices"
+    },
+    {
+      "x": 10,
+      "y": 1024,
+      "label": "10-cube vertices"
+    }
+  ]
+}
